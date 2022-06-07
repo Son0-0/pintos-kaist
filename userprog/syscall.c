@@ -169,7 +169,6 @@ int open (const char *file) {
     for (int i = 2; i < 128; i++) {
       if (!cur->fdt[i]) {
         cur->fdt[i] = fd;
-        cur->next_fd = i + 1;
         return i;
       }
     }

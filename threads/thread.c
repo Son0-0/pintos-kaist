@@ -236,7 +236,6 @@ thread_create (const char *name, int priority,
 	}
   t->fdt[0] = 1;
   t->fdt[1] = 2;
-  t->next_fd = 2;
 
 	/* Add to run queue. */
 	thread_unblock (t);
