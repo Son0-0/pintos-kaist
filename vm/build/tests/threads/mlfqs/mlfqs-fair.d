@@ -8,6 +8,7 @@ tests/threads/mlfqs/mlfqs-fair.o: ../../tests/threads/mlfqs/mlfqs-fair.c \
  ../../include/threads/synch.h ../../include/lib/kernel/list.h \
  ../../include/threads/thread.h ../../include/lib/limits.h \
  ../../include/threads/interrupt.h ../../include/vm/vm.h \
+ ../../include/lib/kernel/hash.h ../../include/lib/kernel/list.h \
  ../../include/vm/uninit.h ../../include/vm/anon.h \
  ../../include/vm/file.h ../../include/filesys/file.h \
  ../../include/filesys/off_t.h ../../include/threads/synch.h \

@@ -1,12 +1,12 @@
 FAIL
-Kernel panic in run: PANIC at ../../threads/thread.c:364 in thread_yield(): assertion `!intr_context ()' failed.
-Call stack: 0x80042186f6 0x800420751a 0x8004207133 0x800420a89a 0x8004214cbd 0x8004209692 0x8004209ab0 0x8004207c93
+Kernel panic in run: PANIC at ../../threads/thread.c:363 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x80042186e8 0x800420750c 0x8004207125 0x800420a88c 0x8004214caf 0x8004209684 0x8004209aa2 0x8004207c85
 Translation of call stack:
-0x00000080042186f6: debug_panic (lib/kernel/debug.c:32)
-0x000000800420751a: thread_yield (threads/thread.c:366)
-0x0000008004207133: test_max_priority (threads/thread.c:272)
-0x000000800420a89a: sema_up (threads/synch.c:124)
-0x0000008004214cbd: interrupt_handler (devices/disk.c:526)
-0x0000008004209692: intr_handler (threads/interrupt.c:352)
-0x0000008004209ab0: intr_entry (threads/intr-stubs.o:?)
-0x0000008004207c93: kernel_thread (threads/thread.c:600)
+0x00000080042186e8: debug_panic (lib/kernel/debug.c:32)
+0x000000800420750c: thread_yield (threads/thread.c:365)
+0x0000008004207125: test_max_priority (threads/thread.c:271)
+0x000000800420a88c: sema_up (threads/synch.c:124)
+0x0000008004214caf: interrupt_handler (devices/disk.c:526)
+0x0000008004209684: intr_handler (threads/interrupt.c:352)
+0x0000008004209aa2: intr_entry (threads/intr-stubs.o:?)
+0x0000008004207c85: kernel_thread (threads/thread.c:599)
