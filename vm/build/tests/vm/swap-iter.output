@@ -14,14 +14,14 @@ Boot complete.
 Putting 'swap-iter' into the file system...
 Putting 'large.txt' into the file system...
 Executing 'swap-iter':
-Kernel PANIC at ../../userprog/process.c:79 in initd(): Fail to launch initd
+Kernel PANIC at ../../userprog/process.c:74 in initd(): Fail to launch initd
 
 Call stack: 0x80042186e8 0x800421bd9e 0x8004207c85.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.
-Timer: 242 ticks
-Thread: 30 idle ticks, 212 kernel ticks, 0 user ticks
+Timer: 227 ticks
+Thread: 30 idle ticks, 197 kernel ticks, 0 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 66 reads, 15902 writes
 hd1:0: 7932 reads, 0 writes

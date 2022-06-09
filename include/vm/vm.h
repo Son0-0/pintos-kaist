@@ -64,7 +64,10 @@ struct page {
 struct frame {
 	void *kva;
 	struct page *page;
+  struct list_elem frame_elem;
 };
+
+static struct list frame_list;
 
 /* The function table for page operations.
  * This is one way of implementing "interface" in C.

@@ -45,8 +45,6 @@ process_create_initd (const char *file_name) {
 	char *fn_copy;
 	tid_t tid;
 
-  // puts("debug choi create initd");
-
 	/* Make a copy of FILE_NAME.
 	 * Otherwise there's a race between the caller and load(). */
 	fn_copy = palloc_get_page (0);
@@ -55,8 +53,6 @@ process_create_initd (const char *file_name) {
 	strlcpy (fn_copy, file_name, PGSIZE);
 
 	/* Create a new thread to execute FILE_NAME. */
-  // printf("create_initd filename: %s\n",file_name);
-
   char *save_ptr;
 	strtok_r(file_name, " ", &save_ptr);
 
@@ -74,7 +70,6 @@ initd (void *f_name) {
 #endif
 
 	process_init ();
-
 	if (process_exec (f_name) < 0)
 		PANIC("Fail to launch initd\n");
 	NOT_REACHED ();
@@ -216,8 +211,9 @@ process_exec (void *f_name) {
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
-	if (!success)
-		return -1;
+	if (!success) {
+		return -1; 
+  }
 
 	/* Start switched process. */
 	do_iret (&_if);
@@ -478,7 +474,6 @@ load (const char *file_name, struct intr_frame *if_) {
 				break;
 		}
 	}
-
 	/* Set up stack. */
 	if (!setup_stack (if_))
 		goto done;
@@ -488,7 +483,6 @@ load (const char *file_name, struct intr_frame *if_) {
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement argument passing (see project2/argument_passing.html). */
-  
   argument_stack(argv, cnt, &if_->rsp);
   if_->R.rdi = cnt;
   if_->R.rsi = if_->rsp + 8;
@@ -526,10 +520,8 @@ void argument_stack(char **parse, int count, void **esp) {
 
 	// * argv[i] 문자열
 	for (int i = count - 1; -1 < i; i--) {
-    // printf("%d parse[%d]: '%s' / len: %d\n", (int)*esp, i, parse[i], strlen(parse[i]));
     *esp -= (strlen(parse[i]) + 1);
     memcpy(*esp, parse[i], strlen(parse[i]) + 1);
-		// strlcpy(*esp, parse[i], strlen(parse[i]) + 1);
 		size += strlen(parse[i]) + 1;
 		argv_address[i] = *esp;
 	}

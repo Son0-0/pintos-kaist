@@ -13,9 +13,9 @@ Formatting file system...done.
 Boot complete.
 Putting 'create-exists' into the file system...
 Executing 'create-exists':
-??????!!!!!!!!?!?!?!??!Kernel PANIC at ../../userprog/process.c:82 in initd(): Fail to launch initd
+Kernel PANIC at ../../userprog/process.c:74 in initd(): Fail to launch initd
 
-Call stack: 0x80042186e8 0x800421bdef 0x8004207c85.
+Call stack: 0x80042186e8 0x800421bd9e 0x8004207c85.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.
@@ -25,5 +25,5 @@ hd0:0: 0 reads, 0 writes
 hd0:1: 39 reads, 236 writes
 hd1:0: 104 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1182 characters output
+Console: 1159 characters output
 Key

@@ -13,17 +13,17 @@ Formatting file system...done.
 Boot complete.
 Putting 'read-stdout' into the file system...
 Executing 'read-stdout':
-??????!!!!!!Kernel PANIC at ../../userprog/process.c:82 in initd(): Fail to launch initd
+Kernel PANIC at ../../userprog/process.c:74 in initd(): Fail to launch initd
 
-Call stack: 0x80042186e8 0x800421bdd4 0x8004207c85.
+Call stack: 0x80042186e8 0x800421bd9e 0x8004207c85.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.
-Timer: 59 ticks
-Thread: 30 idle ticks, 28 kernel ticks, 1 user ticks
+Timer: 58 ticks
+Thread: 30 idle ticks, 28 kernel ticks, 0 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 39 reads, 232 writes
 hd1:0: 102 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1163 characters output
+Console: 1151 characters output
 Key

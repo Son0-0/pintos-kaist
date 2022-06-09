@@ -15,17 +15,17 @@ Putting 'multi-child-fd' into the file system...
 Putting 'sample.txt' into the file system...
 Putting 'child-close' into the file system...
 Executing 'multi-child-fd':
-??????!!!!!!Kernel PANIC at ../../userprog/process.c:82 in initd(): Fail to launch initd
+Kernel PANIC at ../../userprog/process.c:74 in initd(): Fail to launch initd
 
-Call stack: 0x80042186e8 0x800421bdd4 0x8004207c85.
+Call stack: 0x80042186e8 0x800421bd9e 0x8004207c85.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.
 Timer: 63 ticks
-Thread: 30 idle ticks, 33 kernel ticks, 0 user ticks
+Thread: 30 idle ticks, 32 kernel ticks, 1 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 95 reads, 488 writes
 hd1:0: 220 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1298 characters output
+Console: 1286 characters output
 Key

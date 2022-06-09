@@ -13,7 +13,7 @@ Formatting file system...done.
 Boot complete.
 Putting 'mmap-write' into the file system...
 Executing 'mmap-write':
-Kernel PANIC at ../../userprog/process.c:79 in initd(): Fail to launch initd
+Kernel PANIC at ../../userprog/process.c:74 in initd(): Fail to launch initd
 
 Call stack: 0x80042186e8 0x800421bd9e 0x8004207c85.
 The `backtrace' program can make call stacks useful.

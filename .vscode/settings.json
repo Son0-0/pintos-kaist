@@ -15,6 +15,7 @@
     "fstream": "c",
     "sstream": "c",
     "memory_resource": "c",
-    "mmu.h": "c"
+    "mmu.h": "c",
+    "malloc.h": "c"
   }
 }

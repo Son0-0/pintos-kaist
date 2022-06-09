@@ -4,6 +4,9 @@
 #include "vm/vm.h"
 #include "vm/inspect.h"
 
+// * Project 3 추가
+#include "threads/mmu.h"
+
 /* Initializes the virtual memory subsystem by invoking each subsystem's
  * intialize codes. */
 void
@@ -128,6 +131,9 @@ vm_get_frame (void) {
 	ASSERT (frame != NULL);
 	ASSERT (frame->page == NULL);
 
+  // Son0-0
+  list_push_back(&frame_list, &frame->frame_elem);
+
 	return frame;
 }
 
@@ -184,7 +190,7 @@ vm_do_claim_page (struct page *page) {
 	page->frame = frame;
 
 	/* TODO: Insert page table entry to map page's VA to frame's PA. */
-
+  // pml4_set_page
 	spt_insert_page(&thread_current()->spt, page);
 
 	return swap_in (page, frame->kva);
