@@ -17,6 +17,7 @@
     "memory_resource": "c",
     "mmu.h": "c",
     "malloc.h": "c",
-    "inspect.h": "c"
+    "inspect.h": "c",
+    "loader.h": "c"
   }
 }

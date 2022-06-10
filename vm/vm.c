@@ -49,6 +49,7 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 
 	ASSERT (VM_TYPE(type) != VM_UNINIT)
 
+  bool success = false;
 	struct supplemental_page_table *spt = &thread_current ()->spt;
 
 	/* Check wheter the upage is already occupied or not. */
@@ -63,11 +64,16 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
       uninit_new(p, upage, &init, type, aux, anon_initializer);
     else if(type == VM_FILE)
       uninit_new(p, upage, &init, type, aux, file_backed_initializer);
+
+    p->writable = writable;
 		/* TODO: Insert the page into the spt. */
-    spt_insert_page(spt, p);
+    // * return 안했음
+    success = spt_insert_page(spt, p);
 	}
+  return success;
 err:
-	return false;
+  return success;
+	// return false;
 }
 
 /* Find VA from spt and return page. On error, return NULL. */
@@ -78,7 +84,7 @@ spt_find_page (struct supplemental_page_table *spt UNUSED, void *va UNUSED) {
 	struct page p;
 	struct hash_elem *e;
 
-	p.va = va;
+	p.va = pg_round_down(va);
 	e = hash_find(&(spt->pages), &p.hash_elem);
 	
 	return e != NULL ? hash_entry (e, struct page, hash_elem) : NULL;
