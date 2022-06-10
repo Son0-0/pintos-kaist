@@ -16,6 +16,7 @@
     "sstream": "c",
     "memory_resource": "c",
     "mmu.h": "c",
-    "malloc.h": "c"
+    "malloc.h": "c",
+    "inspect.h": "c"
   }
 }
