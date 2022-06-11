@@ -19,6 +19,7 @@ vm_init (void) {
 	register_inspect_intr ();
 	/* DO NOT MODIFY UPPER LINES. */
 	/* TODO: Your code goes here. */
+  list_init(&frame_list);
 }
 
 /* Get the type of the page. This function is useful if you want to know the
@@ -50,14 +51,17 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 	ASSERT (VM_TYPE(type) != VM_UNINIT)
 
  	bool success = false;
-	struct supplemental_page_table *spt = &thread_current ()->spt;
+	struct supplemental_page_table *spt = &thread_current()->spt;
 	if (type == (VM_ANON||VM_MARKER_0) ){
-		struct page *page = (struct page *)malloc(sizeof(struct page));
-		page->va = upage;
+		struct page *page = (struct page*)malloc(sizeof(struct page));
+    struct frame *frame = vm_get_frame(); // * ref: 혜진
+    frame->page = page;
+    page->frame = frame;
+		page->va = pg_round_down(upage); // * ref: 혜진 + 연어
 		page->writable = writable;
-
 		spt_insert_page(spt, page);
-		return vm_claim_page(page->va);
+    pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable); // * ref: 혜진
+		return true;
 	}
 
 	/* Check wheter the upage is already occupied or not. */
@@ -66,7 +70,7 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 		 * TODO: and then create "uninit" page struct by calling uninit_new. You
 		 * TODO: should modify the field after calling the uninit_new. */
     // 연어: 필드 바꾸라는데 뭐라는지 모르겠음
-    struct page *p = malloc(sizeof(struct page));
+    struct page *p = (struct page*)malloc(sizeof(struct page));
 
     if (type == VM_ANON)
       uninit_new(p, upage, &init, type, aux, anon_initializer);
@@ -152,8 +156,8 @@ vm_get_frame (void) {
 	ASSERT (frame != NULL);
 	ASSERT (frame->page == NULL);
 
-  	// Son0-0
-  	list_push_back(&frame_list, &frame->frame_elem);
+  // Son0-0
+  list_push_back(&frame_list, &frame->frame_elem);
 
 	return frame;
 }
@@ -173,12 +177,16 @@ bool
 vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 		bool user UNUSED, bool write UNUSED, bool not_present UNUSED) {
 	struct supplemental_page_table *spt UNUSED = &thread_current ()->spt;
-	struct page *page = NULL;
+	struct page *page = spt_find_page(spt, addr); // * ref: 혜진
 	/* TODO: Validate the fault */
 	/* TODO: Your code goes here */
-
-	if (not_present){
-		page = spt_find_page(spt, addr);
+  puts("=================handler called from exception.c =================");
+  if (page)
+    puts("========== found page! ==========");
+  else
+    puts("==========  ==========");
+	if (page && not_present){
+    
 	}
 	else 
 		return false;
@@ -217,6 +225,8 @@ vm_do_claim_page (struct page *page) {
 
 	/* TODO: Insert page table entry to map page's VA to frame's PA. */
 	// spt_insert_page(&thread_current()->spt, page); 연어
+  // * ref: 혜진
+  pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable);
 
 	return swap_in (page, frame->kva);
 }

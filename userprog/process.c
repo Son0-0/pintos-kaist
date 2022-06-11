@@ -487,6 +487,8 @@ load (const char *file_name, struct intr_frame *if_) {
   if_->R.rdi = cnt;
   if_->R.rsi = if_->rsp + 8;
 
+  hex_dump(if_->rsp, if_->rsp, USER_STACK - if_->rsp, true);
+
 	success = true;
 
   // * 추가
@@ -520,6 +522,7 @@ void argument_stack(char **parse, int count, void **esp) {
 
 	// * argv[i] 문자열
 	for (int i = count - 1; -1 < i; i--) {
+    printf("argv = %s\n", parse[i]);
     *esp -= (strlen(parse[i]) + 1);
     memcpy(*esp, parse[i], strlen(parse[i]) + 1);
 		size += strlen(parse[i]) + 1;
@@ -703,6 +706,7 @@ lazy_load_segment (struct page *page, struct dummy *aux) {
 	/* TODO: Load the segment from the file */
 	/* TODO: This called when the first page fault occurs on address VA. */
 	/* TODO: VA is available when calling this function. */
+  puts("lazy load segment");
 	if (file_read (aux->file, page, aux->read_bytes) != (int) aux->read_bytes) {
 		palloc_free_page (page);
 		return false;
@@ -746,7 +750,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		 * and zero the final PAGE_ZERO_BYTES bytes. */
 		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
-    // printf("prb: %d pzb: %d upage: %u\n", page_read_bytes, page_zero_bytes, upage);
+    printf("prb: %d pzb: %d upage: %u\n", page_read_bytes, page_zero_bytes, upage);
 		/* TODO: Set up aux to pass information to the lazy_load_segment. */
 		// * 연어: 없어보임 -> 있어보여짐 -> writable upage 왜 넣지? 이상
 		struct dummy *aux;
@@ -780,7 +784,8 @@ setup_stack (struct intr_frame *if_) {
 	/* TODO: Your code goes here */
 
 	success = vm_alloc_page_with_initializer (VM_ANON||VM_MARKER_0, stack_bottom, true, NULL, NULL);
-
+  if_->rsp = USER_STACK;
+  // return true;
 	return success;
 
 }

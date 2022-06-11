@@ -120,4 +120,5 @@ bool page_less (const struct hash_elem *a_, const struct hash_elem *b_, void *au
 unsigned page_hash (const struct hash_elem *p_, void *aux UNUSED);
 
 #endif  /* VM_VM_H */
+static struct frame * vm_get_frame (void); // * 추가
 

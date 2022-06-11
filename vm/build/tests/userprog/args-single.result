@@ -1,0 +1,44 @@
+FAIL
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (args) begin
+  (args) argc = 2
+  (args) argv[0] = 'args-single'
+  (args) argv[1] = 'onearg'
+  (args) argv[2] = null
+  (args) end
+  args-single: exit(0)
+Differences in `diff -u' format:
+- (args) begin
+- (args) argc = 2
+- (args) argv[0] = 'args-single'
+- (args) argv[1] = 'onearg'
+- (args) argv[2] = null
+- (args) end
+- args-single: exit(0)
++ prb: 4096 pzb: 0 upage: 4194304
++ prb: 4096 pzb: 0 upage: 4198400
++ prb: 4096 pzb: 0 upage: 4202496
++ prb: 4096 pzb: 0 upage: 4206592
++ prb: 3354 pzb: 742 upage: 4210688
++ prb: 0 pzb: 4096 upage: 6307840
++ prb: 0 pzb: 4096 upage: 6311936
++ argv = onearg
++ argv = args-single
++ 000000004747ffc0                          00 00 00 00 00 00 00 00 |        ........|
++ 000000004747ffd0  ed ff 47 47 00 00 00 00-f9 ff 47 47 00 00 00 00 |..GG......GG....|
++ 000000004747ffe0  00 00 00 00 00 00 00 00-00 00 00 00 00 61 72 67 |.............arg|
++ 000000004747fff0  73 2d 73 69 6e 67 6c 65-00 6f 6e 65 61 72 67 00 |s-single.onearg.|
++ =================handler called from exception.c =================
++ ==========  ==========
++ Page fault at 0x400: not present error reading page in user context.
++ args-single: dying due to interrupt 0x0e (#PF Page-Fault Exception).
++ Interrupt 0x0e (#PF Page-Fault Exception) at rip=400c7f
++  cr2=0000000000000400 error=               4
++ rax 0000000000000400 rbx 0000800424407800 rcx 0000800424400000 rdx 00008004244f1800
++ rsp 000000004747ffc8 rbp 0000800424214800 rsi 000000004747ffd0 rdi 0000000000000002
++ rip 0000000000400c7f r8 00008004242f6000  r9 0000800424407800 r10 0000000000000800
++ r11 0000800421ac5700 r12 0000000000000000 r13 0000000000002000 r14 0000800424001000
++ r15 0000010000001000 rflags 00000202
++ es: 001b ds: 001b cs: 0023 ss: 001b
