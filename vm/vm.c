@@ -49,7 +49,7 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 
 	ASSERT (VM_TYPE(type) != VM_UNINIT)
 
-  bool success = false;
+ 	bool success = false;
 	struct supplemental_page_table *spt = &thread_current ()->spt;
 
 	/* Check wheter the upage is already occupied or not. */
@@ -132,7 +132,7 @@ vm_evict_frame (void) {
  * space.*/
 static struct frame *
 vm_get_frame (void) {
-	struct frame *frame = NULL;
+	struct frame *frame = (struct frame*)malloc(sizeof(struct frame));
 	/* TODO: Fill this function. */
 	//연어
 	frame->kva = palloc_get_page(PAL_USER);
@@ -169,7 +169,11 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 	/* TODO: Validate the fault */
 	/* TODO: Your code goes here */
 
-
+	if (not_present){
+		page->va = addr;
+	}
+	else 
+		return false;
 
 	return vm_do_claim_page (page);
 }
@@ -185,11 +189,11 @@ vm_dealloc_page (struct page *page) {
 /* Claim the page that allocate on VA. */
 bool
 vm_claim_page (void *va UNUSED) {
-	struct page *page = NULL;
+	struct page *page = spt_find_page(thread_current()->spt,va); 
 	/* TODO: Fill this function */
-	// page = palloc_get_page(PAL_USER);
-  page = malloc(sizeof(struct page));
-	page->va = va;
+
+	if (page == NULL)
+		return false;
 
 	return vm_do_claim_page (page);
 }

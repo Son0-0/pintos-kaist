@@ -14,4 +14,14 @@ void argument_stack(char **parse, int count, void **esp);
 struct thread *get_child_process(int pid);
 void remove_child_process(struct thread *cp);
 
+struct dummy {
+    struct file *file;
+    uint8_t *upage;
+    off_t ofs;
+    uint32_t read_bytes;
+    uint32_t zero_bytes;
+    bool writable;
+};
+
+
 #endif /* userprog/process.h */

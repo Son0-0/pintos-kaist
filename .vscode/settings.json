@@ -18,6 +18,27 @@
     "mmu.h": "c",
     "malloc.h": "c",
     "inspect.h": "c",
-    "loader.h": "c"
+    "loader.h": "c",
+    "array": "c",
+    "atomic": "c",
+    "cmath": "c",
+    "unordered_map": "c",
+    "exception": "c",
+    "algorithm": "c",
+    "memory": "c",
+    "optional": "c",
+    "string_view": "c",
+    "type_traits": "c",
+    "utility": "c",
+    "iosfwd": "c",
+    "istream": "c",
+    "limits": "c",
+    "new": "c",
+    "ostream": "c",
+    "streambuf": "c",
+    "system_error": "c",
+    "tuple": "c",
+    "typeinfo": "c",
+    "string": "c"
   }
 }

@@ -19,7 +19,6 @@
 #include "threads/vaddr.h"
 #include "intrinsic.h"
 
-
 #ifdef VM
 #include "vm/vm.h"
 #endif
@@ -640,7 +639,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes) {
 			palloc_free_page (kpage);
 			return false;
-		}
+		} 
 		memset (kpage + page_read_bytes, 0, page_zero_bytes);
 
 		/* Add the page to the process's address space. */
@@ -693,17 +692,31 @@ install_page (void *upage, void *kpage, bool writable) {
 	return (pml4_get_page (t->pml4, upage) == NULL
 			&& pml4_set_page (t->pml4, upage, kpage, writable));
 }
-#else
+// #else 주석
 /* From here, codes will be used after project 3.
  * If you want to implement the function for only project 2, implement it on the
  * upper block. */
 
 static bool
-lazy_load_segment (struct page *page, void *aux) {
+lazy_load_segment (struct page *page, struct dummy *aux) {
+	
 	/* TODO: Load the segment from the file */
 	/* TODO: This called when the first page fault occurs on address VA. */
 	/* TODO: VA is available when calling this function. */
-  puts("lazy load segment");
+	if (file_read (aux->file, page, aux->read_bytes) != (int) aux->read_bytes) {
+		palloc_free_page (page);
+		return false;
+	}
+	memset (&page + aux->read_bytes, 0, aux->zero_bytes);
+
+	/* Add the page to the process's address space. */
+	// * 연어: install page
+	// if (!install_page (aux->upage, page, aux->writable)) {
+	// 	printf("fail\n");
+	// 	palloc_free_page (page);
+	// 	return false;
+	// }
+
 }
 
 /* Loads a segment starting at offset OFS in FILE at address
@@ -733,11 +746,16 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		 * and zero the final PAGE_ZERO_BYTES bytes. */
 		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
-    printf("prb: %d pzb: %d upage: %u\n", page_read_bytes, page_zero_bytes, upage);
+    // printf("prb: %d pzb: %d upage: %u\n", page_read_bytes, page_zero_bytes, upage);
 		/* TODO: Set up aux to pass information to the lazy_load_segment. */
-		void *aux = NULL;
-    // * 연어: 없어보임
-    aux = file;
+		// * 연어: 없어보임 -> 있어보여짐 -> writable upage 왜 넣지? 이상
+		struct dummy *aux;
+		aux->file = file;
+		aux->read_bytes = read_bytes;
+		aux->zero_bytes = zero_bytes;
+		aux->upage = upage;
+		aux->writable = writable;
+
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
 					writable, lazy_load_segment, aux))
 			return false;
@@ -756,11 +774,14 @@ setup_stack (struct intr_frame *if_) {
 	bool success = false;
 	void *stack_bottom = (void *) (((uint8_t *) USER_STACK) - PGSIZE);
 
-	/* TODO: Map the stack on stack_bottom and claim the page immediately.
+	/* TODO: Map the stak on stack_bottom and claim the page immediately.
 	 * TODO: If success, set the rsp accordingly.
 	 * TODO: You should mark the page is stack. */
 	/* TODO: Your code goes here */
 
+	success = vm_alloc_page_with_initializer (VM_ANON||VM_MARKER_0, stack_bottom, true, NULL, NULL);
+
 	return success;
+
 }
 #endif /* VM */
