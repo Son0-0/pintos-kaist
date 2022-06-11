@@ -52,17 +52,6 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 
  	bool success = false;
 	struct supplemental_page_table *spt = &thread_current()->spt;
-	if (type == (VM_ANON||VM_MARKER_0) ){
-		struct page *page = (struct page*)malloc(sizeof(struct page));
-    struct frame *frame = vm_get_frame(); // * ref: 혜진
-    frame->page = page;
-    page->frame = frame;
-		page->va = pg_round_down(upage); // * ref: 혜진 + 연어
-		page->writable = writable;
-		spt_insert_page(spt, page);
-    pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable); // * ref: 혜진
-		return true;
-	}
 
 	/* Check wheter the upage is already occupied or not. */
 	if (spt_find_page (spt, upage) == NULL) {
@@ -72,15 +61,19 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
     // 연어: 필드 바꾸라는데 뭐라는지 모르겠음
     struct page *p = (struct page*)malloc(sizeof(struct page));
 
+    printf("pg_round_down(upage): %u\n", pg_round_down(upage));
+
     if (type == VM_ANON)
-      uninit_new(p, upage, &init, type, aux, anon_initializer);
+      uninit_new(p, pg_round_down(upage), init, type, aux, anon_initializer);
     else if(type == VM_FILE)
-      uninit_new(p, upage, &init, type, aux, file_backed_initializer);
+      uninit_new(p, pg_round_down(upage), init, type, aux, file_backed_initializer);
 
     p->writable = writable;
 		/* TODO: Insert the page into the spt. */
     // * return 안했음
     success = spt_insert_page(spt, p);
+    if (success)
+      printf(">>> page initialized with va: %u <<<\n", p->va);
 	}
   return success;
 err:
@@ -148,10 +141,10 @@ vm_get_frame (void) {
 	/* TODO: Fill this function. */
 	//연어
 	frame->kva = palloc_get_page(PAL_USER);
+  frame->page = NULL;
 	if (frame->kva == NULL){
 		PANIC("todo");
 	}
-	frame->page = NULL;
 
 	ASSERT (frame != NULL);
 	ASSERT (frame->page == NULL);
@@ -178,20 +171,16 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 		bool user UNUSED, bool write UNUSED, bool not_present UNUSED) {
 	struct supplemental_page_table *spt UNUSED = &thread_current ()->spt;
 	struct page *page = spt_find_page(spt, addr); // * ref: 혜진
+  // printf("address: %u / user: %d / write: %d not_present: %d\n", addr, user, write, not_present);
 	/* TODO: Validate the fault */
 	/* TODO: Your code goes here */
-  puts("=================handler called from exception.c =================");
-  if (page)
-    puts("========== found page! ==========");
-  else
-    puts("==========  ==========");
 	if (page && not_present){
-    
+    return vm_do_claim_page(page);
 	}
-	else 
-		return false;
-
-	return vm_do_claim_page (page);
+  else {
+    puts("vm try handle fault false");
+    return false;
+  }
 }
 
 /* Free the page.

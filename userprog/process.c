@@ -464,9 +464,11 @@ load (const char *file_name, struct intr_frame *if_) {
 						read_bytes = 0;
 						zero_bytes = ROUND_UP (page_offset + phdr.p_memsz, PGSIZE);
 					}
+          puts("=====load start====");
 					if (!load_segment (file, file_page, (void *) mem_page,
 								read_bytes, zero_bytes, writable))
 						goto done;
+          puts("====load end====");
 				}
 				else
 					goto done;
@@ -522,7 +524,6 @@ void argument_stack(char **parse, int count, void **esp) {
 
 	// * argv[i] 문자열
 	for (int i = count - 1; -1 < i; i--) {
-    printf("argv = %s\n", parse[i]);
     *esp -= (strlen(parse[i]) + 1);
     memcpy(*esp, parse[i], strlen(parse[i]) + 1);
 		size += strlen(parse[i]) + 1;
@@ -706,21 +707,15 @@ lazy_load_segment (struct page *page, struct dummy *aux) {
 	/* TODO: Load the segment from the file */
 	/* TODO: This called when the first page fault occurs on address VA. */
 	/* TODO: VA is available when calling this function. */
+  printf("page va: %u aux readbyte: %d aux zerobyte: %d\n", page->va, aux->read_bytes, aux->zero_bytes);
   puts("lazy load segment");
-	if (file_read (aux->file, page, aux->read_bytes) != (int) aux->read_bytes) {
-		palloc_free_page (page);
+	if (file_read_at(aux->file, page->frame->kva, aux->read_bytes, aux->ofs) != (int) aux->read_bytes) {
+    palloc_free_page (page);
 		return false;
 	}
-	memset (&page + aux->read_bytes, 0, aux->zero_bytes);
-
-	/* Add the page to the process's address space. */
-	// * 연어: install page
-	// if (!install_page (aux->upage, page, aux->writable)) {
-	// 	printf("fail\n");
-	// 	palloc_free_page (page);
-	// 	return false;
-	// }
-
+	memset (page->frame->kva + aux->read_bytes, 0, aux->zero_bytes);
+  puts("true");
+  return true;
 }
 
 /* Loads a segment starting at offset OFS in FILE at address
@@ -750,23 +745,24 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		 * and zero the final PAGE_ZERO_BYTES bytes. */
 		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
-    printf("prb: %d pzb: %d upage: %u\n", page_read_bytes, page_zero_bytes, upage);
+    // printf("prb: %d pzb: %d upage: %u\n", page_read_bytes, page_zero_bytes, upage);
 		/* TODO: Set up aux to pass information to the lazy_load_segment. */
 		// * 연어: 없어보임 -> 있어보여짐 -> writable upage 왜 넣지? 이상
-		struct dummy *aux;
+		struct dummy *aux = (struct dummy*)malloc(sizeof(struct dummy));
 		aux->file = file;
-		aux->read_bytes = read_bytes;
-		aux->zero_bytes = zero_bytes;
+		aux->read_bytes = page_read_bytes; // * 혜진
+		aux->zero_bytes = page_zero_bytes;
 		aux->upage = upage;
 		aux->writable = writable;
+    aux->ofs = ofs;
 
-		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
-					writable, lazy_load_segment, aux))
+		if (!vm_alloc_page_with_initializer (VM_ANON, upage, writable, lazy_load_segment, aux))
 			return false;
 
 		/* Advance. */
 		read_bytes -= page_read_bytes;
 		zero_bytes -= page_zero_bytes;
+    ofs += page_read_bytes;
 		upage += PGSIZE;
 	}
 	return true;
@@ -783,10 +779,10 @@ setup_stack (struct intr_frame *if_) {
 	 * TODO: You should mark the page is stack. */
 	/* TODO: Your code goes here */
 
+  puts("xxxxxxxxxxxxxxxx setup stack xxxxxxxxxxxxxxxx");
+
 	success = vm_alloc_page_with_initializer (VM_ANON||VM_MARKER_0, stack_bottom, true, NULL, NULL);
   if_->rsp = USER_STACK;
-  // return true;
 	return success;
-
 }
 #endif /* VM */

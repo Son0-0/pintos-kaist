@@ -39,6 +39,7 @@
     "system_error": "c",
     "tuple": "c",
     "typeinfo": "c",
-    "string": "c"
+    "string": "c",
+    "vm.h": "c"
   }
 }
