@@ -464,11 +464,9 @@ load (const char *file_name, struct intr_frame *if_) {
 						read_bytes = 0;
 						zero_bytes = ROUND_UP (page_offset + phdr.p_memsz, PGSIZE);
 					}
-          puts("=====load start====");
 					if (!load_segment (file, file_page, (void *) mem_page,
 								read_bytes, zero_bytes, writable))
 						goto done;
-          puts("====load end====");
 				}
 				else
 					goto done;
@@ -489,7 +487,7 @@ load (const char *file_name, struct intr_frame *if_) {
   if_->R.rdi = cnt;
   if_->R.rsi = if_->rsp + 8;
 
-  hex_dump(if_->rsp, if_->rsp, USER_STACK - if_->rsp, true);
+  // hex_dump(if_->rsp, if_->rsp, USER_STACK - if_->rsp, true);
 
 	success = true;
 
@@ -707,14 +705,14 @@ lazy_load_segment (struct page *page, struct dummy *aux) {
 	/* TODO: Load the segment from the file */
 	/* TODO: This called when the first page fault occurs on address VA. */
 	/* TODO: VA is available when calling this function. */
-  printf("page va: %u aux readbyte: %d aux zerobyte: %d\n", page->va, aux->read_bytes, aux->zero_bytes);
-  puts("lazy load segment");
+  // printf("page va: %u aux readbyte: %d aux zerobyte: %d\n", page->va, aux->read_bytes, aux->zero_bytes);
 	if (file_read_at(aux->file, page->frame->kva, aux->read_bytes, aux->ofs) != (int) aux->read_bytes) {
-    palloc_free_page (page);
+    palloc_free_page (page->frame->kva);
+    free(aux);
 		return false;
 	}
 	memset (page->frame->kva + aux->read_bytes, 0, aux->zero_bytes);
-  puts("true");
+  free(aux);
   return true;
 }
 
@@ -779,10 +777,10 @@ setup_stack (struct intr_frame *if_) {
 	 * TODO: You should mark the page is stack. */
 	/* TODO: Your code goes here */
 
-  puts("xxxxxxxxxxxxxxxx setup stack xxxxxxxxxxxxxxxx");
-
-	success = vm_alloc_page_with_initializer (VM_ANON||VM_MARKER_0, stack_bottom, true, NULL, NULL);
-  if_->rsp = USER_STACK;
+  if (vm_alloc_page_with_initializer (VM_ANON||VM_MARKER_0, stack_bottom, true, NULL, NULL)) {
+    success = vm_claim_page(stack_bottom);
+    if_->rsp = USER_STACK;
+  }
 	return success;
 }
 #endif /* VM */

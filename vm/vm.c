@@ -61,8 +61,6 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
     // 연어: 필드 바꾸라는데 뭐라는지 모르겠음
     struct page *p = (struct page*)malloc(sizeof(struct page));
 
-    printf("pg_round_down(upage): %u\n", pg_round_down(upage));
-
     if (type == VM_ANON)
       uninit_new(p, pg_round_down(upage), init, type, aux, anon_initializer);
     else if(type == VM_FILE)
@@ -70,10 +68,7 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 
     p->writable = writable;
 		/* TODO: Insert the page into the spt. */
-    // * return 안했음
     success = spt_insert_page(spt, p);
-    if (success)
-      printf(">>> page initialized with va: %u <<<\n", p->va);
 	}
   return success;
 err:
@@ -178,7 +173,6 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
     return vm_do_claim_page(page);
 	}
   else {
-    puts("vm try handle fault false");
     return false;
   }
 }
@@ -237,6 +231,7 @@ void
 supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	/* TODO: Destroy all the supplemental_page_table hold by thread and
 	 * TODO: writeback all the modified contents to the storage. */
+  hash_clear(&spt->pages, &delete_page);
 }
 
 
@@ -255,4 +250,10 @@ unsigned
 page_hash (const struct hash_elem *p_, void *aux UNUSED) {
   const struct page *p = hash_entry (p_, struct page, hash_elem);
   return hash_bytes (&p->va, sizeof p->va);
+}
+
+void
+delete_page (const struct hash_elem *a_, void *aux UNUSED) {
+  struct page *page = hash_entry(a_, struct page, hash_elem);
+  vm_dealloc_page(page);
 }
