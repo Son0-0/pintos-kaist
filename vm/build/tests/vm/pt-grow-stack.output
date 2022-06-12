@@ -14,25 +14,15 @@ Boot complete.
 Putting 'pt-grow-stack' into the file system...
 Executing 'pt-grow-stack':
 (pt-grow-stack) begin
-Page fault page: 0x4747e000
-Page fault at 0x4747ee78: not present error writing page in user context.
-pt-grow-stack: dying due to interrupt 0x0e (#PF Page-Fault Exception).
-Interrupt 0x0e (#PF Page-Fault Exception) at rip=400116
- cr2=000000004747ee78 error=               6
-rax 00000000004001cd rbx 0000800424407800 rcx 00000000000000ff rdx 0000000000000006
-rsp 000000004747ee80 rbp 000000004747ff90 rsi 0000000000404690 rdi 000000004747ee8e
-rip 0000000000400116 r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
-r11 0000000000000206 r12 00008004244f1800 r13 0000800420aec800 r14 00008004242f1000
-r15 0000010000000000 rflags 00000202
-es: 001b ds: 001b cs: 0023 ss: 001b
+pt-grow-stack: exit(-1)
 Execution of 'pt-grow-stack' complete.
-Timer: 64 ticks
-Thread: 30 idle ticks, 29 kernel ticks, 6 user ticks
+Timer: 61 ticks
+Thread: 30 idle ticks, 29 kernel ticks, 2 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 85 reads, 254 writes
 hd1:0: 113 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1618 characters output
+Console: 960 characters output
 Keyboard: 0 keys pressed
 Exception: 1 page faults
 Powering off...

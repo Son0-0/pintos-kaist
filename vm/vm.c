@@ -224,6 +224,9 @@ supplemental_page_table_init (struct supplemental_page_table *spt UNUSED) {
 bool
 supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 		struct supplemental_page_table *src UNUSED) {
+      // dst -> src
+      src->pages.aux = &dst;
+      hash_apply(&src->pages, &copy_page);
 }
 
 /* Free the resource hold by the supplemental page table */
@@ -256,4 +259,10 @@ void
 delete_page (const struct hash_elem *a_, void *aux UNUSED) {
   struct page *page = hash_entry(a_, struct page, hash_elem);
   vm_dealloc_page(page);
+}
+
+void copy_page (struct hash *h, const struct hash_elem *a_) {
+  struct page *page = hash_entry(a_, struct page, hash_elem);
+  // vm_alloc_page_with_initializer(page->)
+  // hash_insert(&h, a_);
 }

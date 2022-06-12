@@ -14,6 +14,7 @@ enum vm_type {
 	/* page that hold the page cache, for project 4 */
 	VM_PAGE_CACHE = 3,
 
+  VM_FORK = 4,
 	/* Bit flags to store state */
 
 	/* Auxillary bit flag marker for store information. You can add more
@@ -45,7 +46,7 @@ struct page {
 	const struct page_operations *operations;
 	void *va;              /* Address in terms of user space */
 	struct frame *frame;   /* Back reference for frame */
-
+  enum vm_type type;
 	/* Your implementation */
 	struct hash_elem hash_elem;
   	bool writable;
@@ -119,6 +120,7 @@ enum vm_type page_get_type (struct page *page);
 bool page_less (const struct hash_elem *a_, const struct hash_elem *b_, void *aux UNUSED);
 unsigned page_hash (const struct hash_elem *p_, void *aux UNUSED);
 void delete_page (const struct hash_elem *a_, void *aux UNUSED);
+void copy_page (struct hash *h, const struct hash_elem *a_);
 #endif  /* VM_VM_H */
 static struct frame * vm_get_frame (void); // * 추가
 

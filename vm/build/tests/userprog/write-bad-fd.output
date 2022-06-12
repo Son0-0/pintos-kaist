@@ -14,31 +14,15 @@ Boot complete.
 Putting 'write-bad-fd' into the file system...
 Executing 'write-bad-fd':
 (write-bad-fd) begin
-Page fault page: 0x800c2d4000
-Page fault at 0x800c2d4a10: not present error reading page in kernel context.
-Interrupt 0x0e (#PF Page-Fault Exception) at rip=800421ddb8
- cr2=000000800c2d4a10 error=               0
-rax 000000800c2d4a10 rbx 0000800424407800 rcx 0000008004248000 rdx 0000000008091a10
-rsp 0000008004242ef0 rbp 0000008004242f10 rsi 000000004747ff8f rdi 0000008004248000
-rip 000000800421ddb8 r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
-r11 0000000000000202 r12 000000800421d661 r13 0000800420aec800 r14 00008004242f1000
-r15 0000010000000000 rflags 00000202
-es: 001b ds: 001b cs: 0008 ss: 0010
-Kernel PANIC at ../../userprog/exception.c:97 in kill(): Kernel bug - unexpected interrupt in kernel
-Call stack: 0x80042186e8 0x800421d33e 0x800421d513 0x8004209684 0x8004209aa2 0x800421d828 0x800421d58a 0x400111 0x40021d 0x400cbe 0Interrupt 0x0d (#GP General Protection Exception) at rip=8004215722
- cr2=000000800c2d4a10 error=               0
-rax 0000800424214800 rbx 0000800424407800 rcx 00000080040b8000 rdx 00000000000003d4
-rsp 0000008004242cf0 rbp 0000008004242d00 rsi 000000000000b30f rdi 0000000000000000
-rip 0000008004215722 r8 0000008004242c08  r9 000000800421bb61 r10 0000000000000000
-r11 0000000000000202 r12 000000800421d661 r13 0000800420aec800 r14 00008004242f1000
-r15 0000010000000000 rflags 00000006
-es: 0010 ds: 0010 cs: 0008 ss: 0010
-Kernel PANIC recursion at ../../userprog/exception.c:97 in kill().
-Timer: 64 ticks
-Thread: 30 idle ticks, 28 kernel ticks, 6 user ticks
+write-bad-fd: exit(-1)
+Execution of 'write-bad-fd' complete.
+Timer: 60 ticks
+Thread: 30 idle ticks, 28 kernel ticks, 2 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 80 reads, 234 writes
 hd1:0: 103 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 2333 characters output
-Key
+Console: 953 characters output
+Keyboard: 0 keys pressed
+Exception: 1 page faults
+Powering off...

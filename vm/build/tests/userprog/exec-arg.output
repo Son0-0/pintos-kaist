@@ -28,7 +28,7 @@ r11 0000000000000202 r12 00008004242e6000 r13 0000012440780000 r14 00008004242e6
 r15 000080042087f700 rflags 00000282
 es: 001b ds: 001b cs: 0023 ss: 001b
 Execution of 'exec-arg' complete.
-Timer: 68 ticks
+Timer: 69 ticks
 Thread: 30 idle ticks, 32 kernel ticks, 7 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 154 reads, 446 writes
