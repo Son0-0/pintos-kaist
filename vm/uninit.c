@@ -34,7 +34,7 @@ uninit_new (struct page *page, void *va, vm_initializer *init,
 		.va = va,
 		.frame = NULL, /* no frame for now */
 		.uninit = (struct uninit_page) {
-			.init = init,
+			.init = init,// uninit- lazy_logsegment // 스택업에서는 null이 들어감
 			.type = type,
 			.aux = aux,
 			.page_initializer = initializer,
@@ -49,6 +49,7 @@ uninit_initialize (struct page *page, void *kva) {
 
 	/* Fetch first, page_initialize may overwrite the values */
 	vm_initializer *init = uninit->init;
+	// init = lazy_loadsegment
 	void *aux = uninit->aux;
 
 	/* TODO: You may need to fix this function. */
