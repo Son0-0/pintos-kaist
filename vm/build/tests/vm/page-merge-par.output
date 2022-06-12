@@ -36,8 +36,8 @@ child-sort: exit(-1)
 (page-merge-par) wait for child 0: FAILED
 page-merge-par: exit(1)
 Execution of 'page-merge-par' complete.
-Timer: 125 ticks
-Thread: 30 idle ticks, 33 kernel ticks, 62 user ticks
+Timer: 124 ticks
+Thread: 30 idle ticks, 32 kernel ticks, 62 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 391 reads, 4666 writes
 hd1:0: 218 reads, 0 writes

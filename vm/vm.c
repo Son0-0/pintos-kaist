@@ -66,6 +66,7 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
     else if(type == VM_FILE)
       uninit_new(p, pg_round_down(upage), init, type, aux, file_backed_initializer);
 
+    p->type = type;
     p->writable = writable;
 		/* TODO: Insert the page into the spt. */
     success = spt_insert_page(spt, p);
@@ -263,6 +264,5 @@ delete_page (const struct hash_elem *a_, void *aux UNUSED) {
 
 void copy_page (struct hash *h, const struct hash_elem *a_) {
   struct page *page = hash_entry(a_, struct page, hash_elem);
-  // vm_alloc_page_with_initializer(page->)
   // hash_insert(&h, a_);
 }

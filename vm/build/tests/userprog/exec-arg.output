@@ -28,13 +28,13 @@ r11 0000000000000202 r12 00008004242e6000 r13 0000012440780000 r14 00008004242e6
 r15 000080042087f700 rflags 00000282
 es: 001b ds: 001b cs: 0023 ss: 001b
 Execution of 'exec-arg' complete.
-Timer: 69 ticks
-Thread: 30 idle ticks, 32 kernel ticks, 7 user ticks
+Timer: 74 ticks
+Thread: 30 idle ticks, 34 kernel ticks, 10 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 154 reads, 446 writes
 hd1:0: 204 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1615 characters output
+Console: 1616 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 Powering off...
