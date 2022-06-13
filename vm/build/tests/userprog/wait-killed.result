@@ -4,20 +4,6 @@ Test output failed to match any acceptable form.
 Acceptable output:
   (wait-killed) begin
   (child-bad) begin
-  child-bad: exit(-1)
-  (wait-killed) wait(exec()) = -1
-  (wait-killed) end
-  wait-killed: exit(0)
-Differences in `diff -u' format:
-  (wait-killed) begin
-- (child-bad) begin
-  child-bad: exit(-1)
-  (wait-killed) wait(exec()) = -1
-  (wait-killed) end
-  wait-killed: exit(0)
-Acceptable output:
-  (wait-killed) begin
-  (child-bad) begin
   load: pintos: open failed
   child-bad: exit(-1)
   (wait-killed) wait(exec()) = -1
@@ -25,9 +11,42 @@ Acceptable output:
   wait-killed: exit(0)
 Differences in `diff -u' format:
   (wait-killed) begin
-- (child-bad) begin
-- load: pintos: open failed
+  (child-bad) begin
+  load: pintos: open failed
+  child-bad: exit(-1)
+- (wait-killed) wait(exec()) = -1
+- (wait-killed) end
+- wait-killed: exit(0)
++ wait-killed: dying due to interrupt 0x03 (#BP Breakpoint Exception).
++ Interrupt 0x03 (#BP Breakpoint Exception) at rip=40335d
++  cr2=0000000000403730 error=               0
++ rax 0000000000000004 rbx 0000800424407800 rcx 000000000040335c rdx 0000000000000000
++ rsp 000000004747ff28 rbp 000000004747ff70 rsi 0000000000000000 rdi 0000000000404350
++ rip 000000000040335d r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
++ r11 0000000000000216 r12 00008004244f1800 r13 0000800420aec800 r14 00008004242f1000
++ r15 0000010000000000 rflags 00000216
++ es: 001b ds: 001b cs: 0023 ss: 001b
+Acceptable output:
+  (wait-killed) begin
+  (child-bad) begin
   child-bad: exit(-1)
   (wait-killed) wait(exec()) = -1
   (wait-killed) end
   wait-killed: exit(0)
+Differences in `diff -u' format:
+  (wait-killed) begin
+  (child-bad) begin
++ load: pintos: open failed
+  child-bad: exit(-1)
+- (wait-killed) wait(exec()) = -1
+- (wait-killed) end
+- wait-killed: exit(0)
++ wait-killed: dying due to interrupt 0x03 (#BP Breakpoint Exception).
++ Interrupt 0x03 (#BP Breakpoint Exception) at rip=40335d
++  cr2=0000000000403730 error=               0
++ rax 0000000000000004 rbx 0000800424407800 rcx 000000000040335c rdx 0000000000000000
++ rsp 000000004747ff28 rbp 000000004747ff70 rsi 0000000000000000 rdi 0000000000404350
++ rip 000000000040335d r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
++ r11 0000000000000216 r12 00008004244f1800 r13 0000800420aec800 r14 00008004242f1000
++ r15 0000010000000000 rflags 00000216
++ es: 001b ds: 001b cs: 0023 ss: 001b

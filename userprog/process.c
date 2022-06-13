@@ -155,7 +155,7 @@ __do_fork (void *aux) {
 #ifdef VM
 	supplemental_page_table_init (&current->spt);
 	if (!supplemental_page_table_copy (&current->spt, &parent->spt))
-		goto error;
+    goto error;
 #else
 	if (!pml4_for_each (parent->pml4, duplicate_pte, parent))
 		goto error;
@@ -536,17 +536,20 @@ void argument_stack(char **parse, int count, void **esp) {
   }
 
   *esp -= 8;
-  **(char **)esp = 0;
+  memset(*esp, 0, sizeof(char *));
+  // **(char **)esp = 0;
 
   // * argv[i] 주소
 	for (int i = count - 1; -1 < i; i--) {
 		*esp = *esp - 8;
-		memcpy(*esp, &argv_address[i], strlen(&argv_address[i]));
+    memcpy(*esp, &argv_address[i], sizeof(char *));
+		// memcpy(*esp, &argv_address[i], strlen(&argv_address[i]));
 	}
 
 	// * return address(fake)
-	*esp = *esp - 8;
-	**(char **)esp = 0;
+	*esp -= 8;
+  memset(*esp, 0, sizeof(char *));
+	// **(char **)esp = 0;
 
 }
 

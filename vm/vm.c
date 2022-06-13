@@ -66,7 +66,6 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
     else if(type == VM_FILE)
       uninit_new(p, pg_round_down(upage), init, type, aux, file_backed_initializer);
 
-    p->type = type;
     p->writable = writable;
 		/* TODO: Insert the page into the spt. */
     success = spt_insert_page(spt, p);
@@ -137,16 +136,16 @@ vm_get_frame (void) {
 	/* TODO: Fill this function. */
 	//연어
 	frame->kva = palloc_get_page(PAL_USER);
-  frame->page = NULL;
-	if (frame->kva == NULL){
+	frame->page = NULL;
+  if (frame->kva == NULL){
+    frame = NULL;
 		PANIC("todo");
 	}
-
 	ASSERT (frame != NULL);
 	ASSERT (frame->page == NULL);
 
   // Son0-0
-  list_push_back(&frame_list, &frame->frame_elem);
+  // list_push_back(&frame_list, &frame->frame_elem);
 
 	return frame;
 }
@@ -194,14 +193,14 @@ vm_claim_page (void *va UNUSED) {
 
 	if (page == NULL)
 		return false;
-
+  // printf("current tid: %d and claim page va: %p\n", thread_current()->tid, page->va);
 	return vm_do_claim_page (page);
 }
 
 /* Claim the PAGE and set up the mmu. */
 static bool
 vm_do_claim_page (struct page *page) {
-	struct frame *frame = vm_get_frame ();
+  struct frame *frame = vm_get_frame();
 
 	/* Set links */
 	frame->page = page;
@@ -225,9 +224,8 @@ supplemental_page_table_init (struct supplemental_page_table *spt UNUSED) {
 bool
 supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 		struct supplemental_page_table *src UNUSED) {
-      // dst -> src
-      src->pages.aux = &dst;
       hash_apply(&src->pages, &copy_page);
+      return true;
 }
 
 /* Free the resource hold by the supplemental page table */
@@ -262,7 +260,25 @@ delete_page (const struct hash_elem *a_, void *aux UNUSED) {
   vm_dealloc_page(page);
 }
 
-void copy_page (struct hash *h, const struct hash_elem *a_) {
+void copy_page (const struct hash_elem *a_, void *aux UNUSED) {
+  // * hash_elem으로 부모 page를 찾고 
   struct page *page = hash_entry(a_, struct page, hash_elem);
-  // hash_insert(&h, a_);
+  
+  // * 부모 page의 정보를 활용하여 initializer 호출
+  if (vm_alloc_page_with_initializer(page_get_type(page), page->va, page->writable, NULL, NULL)) {
+    // * 자식 테이블에 방금 생성된 페이지를 찾아서 frame 할당과 frame->kva memcopy
+    struct page *newpage = spt_find_page(&thread_current()->spt, page->va);
+    if (page->frame) {
+      newpage->frame = (struct frame*)malloc(sizeof(struct frame));
+      memcpy(&newpage->frame, &page->frame, sizeof(struct frame *));
+      pml4_set_page(thread_current()->pml4, newpage->va, newpage->frame->kva, newpage->writable);
+    }
+
+    // vm_do_claim_page(newpage);
+
+    // * debug
+    // if (newpage) {
+    //   printf("page found va: %p frame_kva: %p / %p\n", newpage->va, newpage->frame->kva, page->frame->kva);
+    // }
+  }
 }

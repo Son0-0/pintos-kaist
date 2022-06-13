@@ -1,2 +1,2 @@
 FAIL
-run: wait(exec("multi-recurse 14")) returned -1: FAILED
+run: wait(exec("multi-recurse 13")) returned 0: FAILED

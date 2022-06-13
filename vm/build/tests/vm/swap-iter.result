@@ -1,12 +1,13 @@
 FAIL
-Kernel panic in run: PANIC at ../../threads/thread.c:362 in thread_yield(): assertion `!intr_context ()' failed.
-Call stack: 0x80042186e8 0x800420750c 0x8004207125 0x800420a88c 0x8004214caf 0x8004209684 0x8004209aa2 0x8004207c85
+Kernel panic in run: PANIC at ../../vm/vm.c:142 in vm_get_frame(): todo
+Call stack: 0x80042186e8 0x800422145c 0x800422164e 0x8004221586 0x800421d42b 0x8004209684 0x8004209aa2 0x400e2e 0x400e77
 Translation of call stack:
 0x00000080042186e8: debug_panic (lib/kernel/debug.c:32)
-0x000000800420750c: thread_yield (threads/thread.c:364)
-0x0000008004207125: test_max_priority (threads/thread.c:270)
-0x000000800420a88c: sema_up (threads/synch.c:124)
-0x0000008004214caf: interrupt_handler (devices/disk.c:526)
+0x000000800422145c: vm_get_frame (vm/vm.c:144)
+0x000000800422164e: vm_do_claim_page (vm/vm.c:203)
+0x0000008004221586: vm_try_handle_fault (vm/vm.c:173)
+0x000000800421d42b: page_fault (userprog/exception.c:147)
 0x0000008004209684: intr_handler (threads/interrupt.c:352)
 0x0000008004209aa2: intr_entry (threads/intr-stubs.o:?)
-0x0000008004207c85: kernel_thread (threads/thread.c:598)
+0x0000000000400e2e: (unknown)
+0x0000000000400e77: (unknown)

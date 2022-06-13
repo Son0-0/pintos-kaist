@@ -1,2 +1,2 @@
 FAIL
-run: wait for child (should return 0): FAILED
+Run started 'mmap-exit' but it never finished

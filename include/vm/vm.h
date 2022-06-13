@@ -46,10 +46,9 @@ struct page {
 	const struct page_operations *operations;
 	void *va;              /* Address in terms of user space */
 	struct frame *frame;   /* Back reference for frame */
-  enum vm_type type;
 	/* Your implementation */
 	struct hash_elem hash_elem;
-  	bool writable;
+  bool writable;
 
 	/* Per-type data are binded into the union.
 	 * Each function automatically detects the current union */
@@ -120,7 +119,7 @@ enum vm_type page_get_type (struct page *page);
 bool page_less (const struct hash_elem *a_, const struct hash_elem *b_, void *aux UNUSED);
 unsigned page_hash (const struct hash_elem *p_, void *aux UNUSED);
 void delete_page (const struct hash_elem *a_, void *aux UNUSED);
-void copy_page (struct hash *h, const struct hash_elem *a_);
+void copy_page (const struct hash_elem *a_, void *aux UNUSED);
 #endif  /* VM_VM_H */
 static struct frame * vm_get_frame (void); // * 추가
 
