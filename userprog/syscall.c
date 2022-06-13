@@ -252,6 +252,12 @@ void close (int fd) {
 
 void check_address(void *addr) {
   struct thread *cur = thread_current();
+#ifdef VM
+  if (addr == NULL || is_kernel_vaddr(addr) || spt_find_page(&cur->spt, addr) == NULL) {
+    exit(-1);
+  }
+#else
   if (addr == NULL || is_kernel_vaddr(addr) || pml4_get_page(cur->pml4, addr) == NULL)
     exit(-1);
+#endif
 }

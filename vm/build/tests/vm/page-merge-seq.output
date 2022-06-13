@@ -4,7 +4,7 @@ Kernel command line: -q -f put page-merge-seq put child-sort run page-merge-seq
 Pintos booting with: 
 	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
 	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
-Calibrating timer...  130,867,200 loops/s.
+Calibrating timer...  157,081,600 loops/s.
 hd0:0: detected 329 sector (164 kB) disk, model "QEMU HARDDISK", serial "QM00001"
 hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
 hd1:0: detected 216 sector (108 kB) disk, model "QEMU HARDDISK", serial "QM00003"
@@ -18,24 +18,81 @@ Executing 'page-merge-seq':
 (page-merge-seq) init
 (page-merge-seq) sort chunk 0
 (page-merge-seq) child[0] exec
-page-merge-seq: dying due to interrupt 0x03 (#BP Breakpoint Exception).
-Interrupt 0x03 (#BP Breakpoint Exception) at rip=403b87
- cr2=00000000007fde38 error=               0
-rax 0000000000000004 rbx 0000800424407800 rcx 0000000000403b86 rdx 0000000000000000
-rsp 000000004747ff18 rbp 000000004747ff60 rsi 0000000000000000 rdi 0000000000404bb0
-rip 0000000000403b87 r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
-r11 0000000000000216 r12 00008004244f1800 r13 0000800420aec800 r14 00008004242f1000
-r15 0000010000000000 rflags 00000216
-es: 001b ds: 001b cs: 0023 ss: 001b
-child-sort: exit(-1)
+child-sort: exit(123)
+(page-merge-seq) child[0] wait success
+(page-merge-seq) sort chunk 1
+(page-merge-seq) child[1] exec
+child-sort: exit(123)
+(page-merge-seq) child[1] wait success
+(page-merge-seq) sort chunk 2
+(page-merge-seq) child[2] exec
+child-sort: exit(123)
+(page-merge-seq) child[2] wait success
+(page-merge-seq) sort chunk 3
+(page-merge-seq) child[3] exec
+child-sort: exit(123)
+(page-merge-seq) child[3] wait success
+(page-merge-seq) sort chunk 4
+(page-merge-seq) child[4] exec
+child-sort: exit(123)
+(page-merge-seq) child[4] wait success
+(page-merge-seq) sort chunk 5
+(page-merge-seq) child[5] exec
+child-sort: exit(123)
+(page-merge-seq) child[5] wait success
+(page-merge-seq) sort chunk 6
+(page-merge-seq) child[6] exec
+child-sort: exit(123)
+(page-merge-seq) child[6] wait success
+(page-merge-seq) sort chunk 7
+(page-merge-seq) child[7] exec
+child-sort: exit(123)
+(page-merge-seq) child[7] wait success
+(page-merge-seq) sort chunk 8
+(page-merge-seq) child[8] exec
+child-sort: exit(123)
+(page-merge-seq) child[8] wait success
+(page-merge-seq) sort chunk 9
+(page-merge-seq) child[9] exec
+child-sort: exit(123)
+(page-merge-seq) child[9] wait success
+(page-merge-seq) sort chunk 10
+(page-merge-seq) child[10] exec
+child-sort: exit(123)
+(page-merge-seq) child[10] wait success
+(page-merge-seq) sort chunk 11
+(page-merge-seq) child[11] exec
+child-sort: exit(123)
+(page-merge-seq) child[11] wait success
+(page-merge-seq) sort chunk 12
+(page-merge-seq) child[12] exec
+child-sort: exit(123)
+(page-merge-seq) child[12] wait success
+(page-merge-seq) sort chunk 13
+(page-merge-seq) child[13] exec
+child-sort: exit(123)
+(page-merge-seq) child[13] wait success
+(page-merge-seq) sort chunk 14
+(page-merge-seq) child[14] exec
+child-sort: exit(123)
+(page-merge-seq) child[14] wait success
+(page-merge-seq) sort chunk 15
+(page-merge-seq) child[15] exec
+child-sort: exit(123)
+(page-merge-seq) child[15] wait success
+(page-merge-seq) merge
+(page-merge-seq) verify
+(page-merge-seq) success, buf_idx=1,032,192
+(page-merge-seq) end
+page-merge-seq: exit(0)
 Execution of 'page-merge-seq' complete.
-Timer: 92 ticks
-Thread: 30 idle ticks, 37 kernel ticks, 25 user ticks
+Timer: 360 ticks
+Thread: 30 idle ticks, 63 kernel ticks, 267 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 175 reads, 734 writes
+hd0:1: 4902 reads, 4640 writes
 hd1:0: 216 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1690 characters output
+Console: 3137 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 Powering off...

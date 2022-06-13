@@ -1,2 +1,2 @@
 FAIL
-run: two phys addrs should not be the same.: FAILED
+run: two phys addrs should be the same.: FAILED

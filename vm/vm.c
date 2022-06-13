@@ -202,16 +202,13 @@ static bool
 vm_do_claim_page (struct page *page) {
   struct frame *frame = vm_get_frame();
 
-	/* Set links */
-	frame->page = page;
-	page->frame = frame;
+  /* Set links */
+  frame->page = page;
+  page->frame = frame;
 
-	/* TODO: Insert page table entry to map page's VA to frame's PA. */
-	// spt_insert_page(&thread_current()->spt, page); 연어
-  // * ref: 혜진
-  pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable);
-
-	return swap_in (page, frame->kva);
+  /* TODO: Insert page table entry to map page's VA to frame's PA. */
+  pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable); // * ref: 혜진
+  return swap_in (page, frame->kva);
 }
 
 /* Initialize new supplemental page table */
@@ -263,22 +260,16 @@ delete_page (const struct hash_elem *a_, void *aux UNUSED) {
 void copy_page (const struct hash_elem *a_, void *aux UNUSED) {
   // * hash_elem으로 부모 page를 찾고 
   struct page *page = hash_entry(a_, struct page, hash_elem);
-  
+
   // * 부모 page의 정보를 활용하여 initializer 호출
   if (vm_alloc_page_with_initializer(page_get_type(page), page->va, page->writable, NULL, NULL)) {
-    // * 자식 테이블에 방금 생성된 페이지를 찾아서 frame 할당과 frame->kva memcopy
+    // * 자식 테이블에 방금 생성된 페이지를 찾아서 frame 할당과 부모 frame memcopy
     struct page *newpage = spt_find_page(&thread_current()->spt, page->va);
     if (page->frame) {
-      newpage->frame = (struct frame*)malloc(sizeof(struct frame));
-      memcpy(&newpage->frame, &page->frame, sizeof(struct frame *));
+      newpage->frame = vm_get_frame();
+      memcpy(newpage->frame->kva, page->frame->kva, PGSIZE);
+      newpage->frame->page = newpage;
       pml4_set_page(thread_current()->pml4, newpage->va, newpage->frame->kva, newpage->writable);
     }
-
-    // vm_do_claim_page(newpage);
-
-    // * debug
-    // if (newpage) {
-    //   printf("page found va: %p frame_kva: %p / %p\n", newpage->va, newpage->frame->kva, page->frame->kva);
-    // }
   }
 }

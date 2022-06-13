@@ -17,24 +17,32 @@ Executing 'page-merge-stk':
 (page-merge-stk) begin
 (page-merge-stk) init
 (page-merge-stk) sort chunk 0
-page-merge-stk: dying due to interrupt 0x03 (#BP Breakpoint Exception).
-Interrupt 0x03 (#BP Breakpoint Exception) at rip=403c56
- cr2=0000000000805eb8 error=               0
-rax 0000000000000004 rbx 0000800424407800 rcx 0000000000403c55 rdx 0000000000000000
-rsp 000000004747fdc8 rbp 000000004747fe10 rsi 0000000000000000 rdi 0000000000404c50
-rip 0000000000403c56 r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
-r11 0000000000000212 r12 00008004244f1800 r13 0000800420aec800 r14 00008004242f1000
-r15 0000010000000000 rflags 00000212
-es: 001b ds: 001b cs: 0023 ss: 001b
+(page-merge-stk) sort chunk 1
+child-qsort: exit(-1)
+child-qsort: exit(-1)
+(page-merge-stk) sort chunk 2
+child-qsort: exit(-1)
+(page-merge-stk) sort chunk 3
+child-qsort: exit(-1)
+(page-merge-stk) sort chunk 4
+(page-merge-stk) sort chunk 5
+child-qsort: exit(-1)
+(page-merge-stk) sort chunk 6
+child-qsort: exit(-1)
+child-qsort: exit(-1)
+(page-merge-stk) sort chunk 7
+(page-merge-stk) wait for child 0
+(page-merge-stk) wait for child 0: FAILED
+page-merge-stk: exit(1)
 child-qsort: exit(-1)
 Execution of 'page-merge-stk' complete.
-Timer: 95 ticks
-Thread: 30 idle ticks, 35 kernel ticks, 31 user ticks
+Timer: 190 ticks
+Thread: 30 idle ticks, 45 kernel ticks, 116 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 163 reads, 1010 writes
+hd0:1: 580 reads, 4678 writes
 hd1:0: 224 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1664 characters output
+Console: 1549 characters output
 Keyboard: 0 keys pressed
-Exception: 1 page faults
+Exception: 8 page faults
 Powering off...

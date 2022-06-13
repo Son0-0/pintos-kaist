@@ -244,6 +244,7 @@ process_wait (tid_t child_tid UNUSED) {
   int exit_status = child->exit_status;
   list_remove(&child->child_elem);
   sema_up(&child->exit_sema);
+  // printf("tid: %d ctid: %d exit_status: %d\n", thread_current()->tid, child->tid, exit_status);
   return exit_status;
 }
 
