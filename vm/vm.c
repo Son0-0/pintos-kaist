@@ -169,13 +169,31 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
   // printf("address: %u / user: %d / write: %d not_present: %d\n", addr, user, write, not_present);
 	/* TODO: Validate the fault */
 	/* TODO: Your code goes here */
-	if (page && not_present){
-    return vm_do_claim_page(page);
+	struct thread *cur = thread_current();
+	bool success = false;
+
+	// check_address(addr);
+	if(is_kernel_vaddr(addr)){
+		return false;
 	}
-  else {
-    return false;
-  }
+
+	if (not_present){
+     	if (f->rsp == addr+8){
+         	while (cur->stack_bottom > addr){
+				vm_alloc_page_with_initializer (VM_ANON||VM_MARKER_0, cur->stack_bottom-PGSIZE, true, NULL, NULL);
+				if (success = vm_claim_page(cur->stack_bottom-PGSIZE)){
+					cur->stack_bottom -= PGSIZE;
+				}
+			}
+			return success;
+		}
+		if (page) {
+			return vm_do_claim_page(page);
+		}
+	}
+	return false;
 }
+
 
 /* Free the page.
  * DO NOT MODIFY THIS FUNCTION. */
@@ -272,4 +290,35 @@ void copy_page (const struct hash_elem *a_, void *aux UNUSED) {
       pml4_set_page(thread_current()->pml4, newpage->va, newpage->frame->kva, newpage->writable);
     }
   }
+}
+
+void check_valid_buffer (void *buffer, unsigned size, void *esp, bool to_write) {
+	uint64_t start_check = buffer;
+	uint64_t size_check = size;
+	struct thread *cur = thread_current();
+	// printf("========pass???========");
+	while (size_check >= 0){
+		check_address(start_check);
+		struct page *page = spt_find_page(&cur->spt,start_check);
+
+		// printf("writable?=%d\n",page->writable);
+		if (page==NULL || page->writable != to_write){
+			exit(-1);
+		}
+		size_check -= PGSIZE;
+		start_check += PGSIZE;
+	} 
+	return;
+}
+
+void check_valid_string(const void *str, void *esp){
+	struct thread *cur = thread_current();
+
+	check_address(str);
+
+	if (!spt_find_page(&cur->spt,str)){
+		exit(-1);
+	}
+	
+
 }

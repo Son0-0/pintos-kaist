@@ -16,16 +16,15 @@ Putting 'sample.txt' into the file system...
 Executing 'read-zero':
 (read-zero) begin
 (read-zero) open "sample.txt"
-(read-zero) end
-read-zero: exit(0)
+read-zero: exit(-1)
 Execution of 'read-zero' complete.
-Timer: 63 ticks
-Thread: 30 idle ticks, 30 kernel ticks, 3 user ticks
+Timer: 61 ticks
+Thread: 30 idle ticks, 30 kernel ticks, 2 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 111 reads, 248 writes
 hd1:0: 105 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1038 characters output
+Console: 1023 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 Powering off...

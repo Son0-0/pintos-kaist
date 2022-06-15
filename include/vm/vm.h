@@ -123,3 +123,5 @@ void copy_page (const struct hash_elem *a_, void *aux UNUSED);
 #endif  /* VM_VM_H */
 static struct frame * vm_get_frame (void); // * 추가
 
+void check_valid_string(const void *str, void *esp);
+void check_valid_buffer (void *buffer, unsigned size, void *esp, bool to_write);

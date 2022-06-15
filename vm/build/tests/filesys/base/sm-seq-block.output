@@ -19,18 +19,15 @@ Executing 'sm-seq-block':
 (sm-seq-block) writing "noodle"
 (sm-seq-block) close "noodle"
 (sm-seq-block) open "noodle" for verification
-(sm-seq-block) verified contents of "noodle"
-(sm-seq-block) close "noodle"
-(sm-seq-block) end
-sm-seq-block: exit(0)
+sm-seq-block: exit(-1)
 Execution of 'sm-seq-block' complete.
-Timer: 65 ticks
-Thread: 30 idle ticks, 30 kernel ticks, 5 user ticks
+Timer: 63 ticks
+Thread: 30 idle ticks, 28 kernel ticks, 5 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 145 reads, 289 writes
+hd0:1: 133 reads, 289 writes
 hd1:0: 107 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1215 characters output
+Console: 1122 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 Powering off...

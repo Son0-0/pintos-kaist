@@ -18,32 +18,35 @@ Executing 'page-merge-par':
 (page-merge-par) init
 (page-merge-par) sort chunk 0
 (page-merge-par) sort chunk 1
-(child-sort) open "buf0": FAILED
-child-sort: exit(1)
+child-sort: exit(-1)
 (page-merge-par) sort chunk 2
-child-sort: exit(123)
-child-sort: exit(123)
+(child-sort) open "buf1": FAILED
+child-sort: exit(1)
+child-sort: exit(-1)
 (page-merge-par) sort chunk 3
 (page-merge-par) sort chunk 4
-child-sort: exit(123)
+(child-sort) open "buf3": FAILED
+child-sort: exit(1)
+child-sort: exit(-1)
 (page-merge-par) sort chunk 5
-child-sort: exit(123)
 (page-merge-par) sort chunk 6
 (child-sort) open "buf5": FAILED
 child-sort: exit(1)
 (page-merge-par) sort chunk 7
-child-sort: exit(123)
+(child-sort) open "buf6": FAILED
+child-sort: exit(1)
+child-sort: exit(-1)
 (page-merge-par) wait for child 0
 (page-merge-par) wait for child 0: FAILED
 page-merge-par: exit(1)
 Execution of 'page-merge-par' complete.
-Timer: 212 ticks
-Thread: 30 idle ticks, 41 kernel ticks, 141 user ticks
+Timer: 181 ticks
+Thread: 30 idle ticks, 43 kernel ticks, 108 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 2271 reads, 5946 writes
+hd0:1: 764 reads, 4666 writes
 hd1:0: 218 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1588 characters output
+Console: 1667 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 Powering off...

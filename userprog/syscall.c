@@ -12,6 +12,8 @@
 #include "threads/palloc.h"
 #include "filesys/filesys.h"
 #include "filesys/file.h"
+// *vm추가
+#include "vm/vm.h"
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
@@ -49,7 +51,8 @@ syscall_init (void) {
 void
 syscall_handler (struct intr_frame *f UNUSED) {
 	// TODO: Your implementation goes here.
-  
+  check_address(f->rsp);
+
   switch (f->R.rax) {
     case SYS_HALT:
       halt();
@@ -74,9 +77,11 @@ syscall_handler (struct intr_frame *f UNUSED) {
       f->R.rax = (uint64_t)filesize(f->R.rdi);
       break;
     case SYS_READ:
+      check_valid_buffer(f->R.rsi,f->R.rdx, f->rsp,1);
       f->R.rax = (uint64_t)read(f->R.rdi, f->R.rsi, f->R.rdx);
       break;  
-    case SYS_WRITE:      
+    case SYS_WRITE: 
+      check_valid_string(f->R.rsi, f->R.rdx);
       f->R.rax = (uint64_t)write(f->R.rdi, f->R.rsi, f->R.rdx);
       break;
     case SYS_EXEC:
@@ -186,6 +191,7 @@ int filesize (int fd) {
 
 int read (int fd, void *buffer, unsigned size) {
   check_address(buffer);
+  
   if (fd == 1) {
     return -1;
   }
