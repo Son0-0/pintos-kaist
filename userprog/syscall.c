@@ -270,27 +270,20 @@ void check_address(void *addr) {
 
 void check_valid_buffer(void *buffer, unsigned size, bool to_write) {
   check_address(buffer);
-  
-  // int cnt = (size / PGSIZE) + 1;
-  // if (0 < size && (size % PGSIZE == 0))
-  //   cnt = (size / PGSIZE);
 
-  struct page *cur = spt_find_page(&thread_current()->spt, buffer);
-  if (!cur || (to_write && !cur->writable))
-    exit(-1);
+  uint64_t last_page = (uint64_t)(buffer + size);
+  uint64_t addr = buffer;
 
-  // uint64_t addr = buffer;
-  // while (cnt != 0) {
-  //   struct page *cur = spt_find_page(&thread_current()->spt, addr);
-  //   if (!cur || (to_write && !cur->writable))
-  //     exit(-1);
-  //   cnt -= 1;
-  //   addr += PGSIZE;
-  // }
+  while (addr <= last_page) {
+    struct page *cur = spt_find_page(&thread_current()->spt, addr);
+    if (!cur || (to_write && !cur->writable))
+      exit(-1);
+    addr += PGSIZE;
+  }
 }
 
 void check_valid_string(const void *str, unsigned size) {
   check_address(str);
-  if (!spt_find_page(&thread_current()->spt, str))
+  if (spt_find_page(&thread_current()->spt, str) == NULL)
     exit(-1);
 }
