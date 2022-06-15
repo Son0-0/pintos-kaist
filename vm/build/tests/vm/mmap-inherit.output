@@ -18,7 +18,8 @@ Executing 'mmap-inherit':
 (mmap-inherit) begin
 (mmap-inherit) open "sample.txt"
 (mmap-inherit) mmap "sample.txt"
-mmap-inherit: exit(-1)
+(mmap-inherit) mmap "sample.txt": FAILED
+mmap-inherit: exit(1)
 Execution of 'mmap-inherit' complete.
 Timer: 65 ticks
 Thread: 30 idle ticks, 32 kernel ticks, 3 user ticks
@@ -26,7 +27,7 @@ hd0:0: 0 reads, 0 writes
 hd0:1: 143 reads, 478 writes
 hd1:0: 215 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1147 characters output
+Console: 1187 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 Powering off...

@@ -297,6 +297,8 @@ bool copy_page(const struct hash_elem *a_, void *aux UNUSED)
       memcpy(newpage->frame->kva, page->frame->kva, PGSIZE);
       newpage->frame->page = newpage;
       success = pml4_set_page(thread_current()->pml4, newpage->va, newpage->frame->kva, newpage->writable);
+      if (!success)
+        return success;
     }
   }
 

@@ -2,9 +2,14 @@
 
 #include "vm/vm.h"
 
+// * VM 추가
+#include "threads/vaddr.h"
+#include "userprog/process.h"
+
 static bool file_backed_swap_in (struct page *page, void *kva);
 static bool file_backed_swap_out (struct page *page);
 static void file_backed_destroy (struct page *page);
+static bool lazy_load_segment (struct page *page, struct dummy *aux);
 
 /* DO NOT MODIFY this struct */
 static const struct page_operations file_ops = {
@@ -48,11 +53,63 @@ file_backed_destroy (struct page *page) {
 
 /* Do the mmap */
 void *
-do_mmap (void *addr, size_t length, int writable,
-		struct file *file, off_t offset) {
+do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offset) {
+  uint64_t va = addr;
+  while (0 < length) {
+    struct dummy *aux = (struct dummy*)malloc(sizeof(struct dummy));
+    aux->file = file;
+    aux->read_bytes = length < PGSIZE ? length : PGSIZE;
+    aux->zero_bytes = PGSIZE - aux->read_bytes;
+
+    if (!vm_alloc_page_with_initializer(VM_FILE, va, writable, lazy_load_segment, aux)) {
+      return NULL;
+    }
+
+    length -= PGSIZE;
+    va += PGSIZE;
+  }
+  return addr;
 }
 
 /* Do the munmap */
 void
 do_munmap (void *addr) {
+
+  struct page *page = spt_find_page(&thread_current()->spt, addr);
+  if (page) {
+    void *addr = page->file.file_addr;
+    size_t size = page->file.file_size;
+
+    while (0 < size) {
+      if (page && page->frame) {
+        size = page->file.file_size < PGSIZE ? page->file.file_size : PGSIZE;
+        if (size != file_write(page->frame->kva, page->file.file_addr, size))
+          exit(-1);
+        palloc_free_page(page->frame->kva);
+        free(page->frame);
+      }
+      size -= PGSIZE;
+      addr += PGSIZE;
+      free(page);
+      page = spt_find_page(&thread_current()->spt, addr);
+    }
+
+  }
+
+}
+
+static bool
+lazy_load_segment (struct page *page, struct dummy *aux) {
+	
+	/* TODO: Load the segment from the file */
+	/* TODO: This called when the first page fault occurs on address VA. */
+	/* TODO: VA is available when calling this function. */
+	if (file_read_at(aux->file, page->frame->kva, aux->read_bytes, aux->ofs) != (int) aux->read_bytes) {
+    palloc_free_page (page->frame->kva);
+    free(aux);
+		return false;
+	}
+	memset (page->frame->kva + aux->read_bytes, 0, aux->zero_bytes);
+  free(aux);
+  return true;
 }
