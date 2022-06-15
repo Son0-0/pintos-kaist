@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./activate
+source ../activate
 cd ./vm
 make clean
 make check

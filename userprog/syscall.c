@@ -13,6 +13,9 @@
 #include "filesys/filesys.h"
 #include "filesys/file.h"
 
+// * VM 추가
+#include "vm/vm.h"
+
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
 
@@ -49,6 +52,9 @@ syscall_init (void) {
 void
 syscall_handler (struct intr_frame *f UNUSED) {
 	// TODO: Your implementation goes here.
+
+  // * VM Stack Growth 추가 Son0-0
+  // thread_current()->rsp = f->rsp;
   
   switch (f->R.rax) {
     case SYS_HALT:
@@ -185,7 +191,7 @@ int filesize (int fd) {
 }
 
 int read (int fd, void *buffer, unsigned size) {
-  check_address(buffer);
+  check_valid_buffer(buffer, size, true);
   if (fd == 1) {
     return -1;
   }
@@ -207,7 +213,7 @@ int read (int fd, void *buffer, unsigned size) {
 }
 
 int write (int fd UNUSED, const void *buffer, unsigned size) {
-  check_address(buffer);
+  check_valid_string(buffer, size);
 
   if (fd == 0) // STDIN일때 -1
     return -1;
@@ -260,4 +266,31 @@ void check_address(void *addr) {
   if (addr == NULL || is_kernel_vaddr(addr) || pml4_get_page(cur->pml4, addr) == NULL)
     exit(-1);
 #endif
+}
+
+void check_valid_buffer(void *buffer, unsigned size, bool to_write) {
+  check_address(buffer);
+  
+  // int cnt = (size / PGSIZE) + 1;
+  // if (0 < size && (size % PGSIZE == 0))
+  //   cnt = (size / PGSIZE);
+
+  struct page *cur = spt_find_page(&thread_current()->spt, buffer);
+  if (!cur || (to_write && !cur->writable))
+    exit(-1);
+
+  // uint64_t addr = buffer;
+  // while (cnt != 0) {
+  //   struct page *cur = spt_find_page(&thread_current()->spt, addr);
+  //   if (!cur || (to_write && !cur->writable))
+  //     exit(-1);
+  //   cnt -= 1;
+  //   addr += PGSIZE;
+  // }
+}
+
+void check_valid_string(const void *str, unsigned size) {
+  check_address(str);
+  if (!spt_find_page(&thread_current()->spt, str))
+    exit(-1);
 }

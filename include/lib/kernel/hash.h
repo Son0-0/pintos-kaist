@@ -52,7 +52,7 @@ typedef bool hash_less_func (const struct hash_elem *a,
 
 /* Performs some operation on hash element E, given auxiliary
  * data AUX. */
-typedef void hash_action_func (struct hash_elem *e, void *aux);
+typedef void *hash_action_func (struct hash_elem *e, void *aux);
 
 /* Hash table. */
 struct hash {
@@ -83,7 +83,7 @@ struct hash_elem *hash_find (struct hash *, struct hash_elem *);
 struct hash_elem *hash_delete (struct hash *, struct hash_elem *);
 
 /* Iteration. */
-void hash_apply (struct hash *, hash_action_func *);
+bool hash_apply (struct hash *, hash_action_func *);
 void hash_first (struct hash_iterator *, struct hash *);
 struct hash_elem *hash_next (struct hash_iterator *);
 struct hash_elem *hash_cur (struct hash_iterator *);

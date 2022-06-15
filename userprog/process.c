@@ -783,7 +783,10 @@ setup_stack (struct intr_frame *if_) {
 
   if (vm_alloc_page_with_initializer (VM_ANON||VM_MARKER_0, stack_bottom, true, NULL, NULL)) {
     success = vm_claim_page(stack_bottom);
-    if_->rsp = USER_STACK;
+    if (success) {
+      thread_current()->stack_btm = stack_bottom;
+      if_->rsp = USER_STACK;
+    }
   }
 	return success;
 }

@@ -147,9 +147,11 @@ hash_delete (struct hash *h, struct hash_elem *e) {
    any of the functions hash_clear(), hash_destroy(),
    hash_insert(), hash_replace(), or hash_delete(), yields
    undefined behavior, whether done from ACTION or elsewhere. */
-void
+bool
 hash_apply (struct hash *h, hash_action_func *action) {
 	size_t i;
+  int flag_cnt = 0;
+  bool success = true;
 
 	ASSERT (action != NULL);
 
@@ -159,9 +161,11 @@ hash_apply (struct hash *h, hash_action_func *action) {
 
 		for (elem = list_begin (bucket); elem != list_end (bucket); elem = next) {
 			next = list_next (elem);
-			action (list_elem_to_hash_elem (elem), h->aux);
+			if (!action (list_elem_to_hash_elem (elem), h->aux))
+        success = false;
 		}
 	}
+  return success;
 }
 
 /* Initializes I for iterating hash table H.

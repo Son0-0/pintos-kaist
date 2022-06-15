@@ -125,6 +125,10 @@ struct thread {
 
   struct file *run_file;
 
+  // * VM Stack Growth 추가 Son0-0
+  uintptr_t rsp;
+  uint64_t stack_btm;
+
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	uint64_t *pml4;                     /* Page map level 4 */
