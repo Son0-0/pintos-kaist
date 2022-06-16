@@ -177,15 +177,15 @@ vm_handle_wp(struct page *page UNUSED)
 bool vm_try_handle_fault(struct intr_frame *f UNUSED, void *addr UNUSED,
                          bool user UNUSED, bool write UNUSED, bool not_present UNUSED)
 {
+  // printf("fault addr: %p user: %d write: %d not_present: %d\n", addr, user, write, not_present);
   struct supplemental_page_table *spt UNUSED = &thread_current()->spt;
   struct page *page = spt_find_page(spt, addr); // * ref: 혜진
   /* TODO: Validate the fault */
   /* TODO: Your code goes here */
   if (is_kernel_vaddr(addr))
     return false;
-  if (page && not_present) {
+  if (page && not_present)
     return vm_do_claim_page(page);
-  }
   if (f->rsp - 8 == addr) {
     uint64_t size = thread_current()->stack_btm;
     while (addr < size) {

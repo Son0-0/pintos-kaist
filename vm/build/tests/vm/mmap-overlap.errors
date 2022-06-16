@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/ubuntu/pintos-kaist/utils/pintos", line 225, in <module>
+    guestfns=[f[0].split(':') for f in args.GUESTFNS]).run()
+  File "/home/ubuntu/pintos-kaist/utils/pintos", line 158, in run
+    if self.host_fns or self.guest_fns else ([], []))
+  File "/home/ubuntu/pintos-kaist/utils/pintos", line 66, in __prepare_scratch_files
+    with open(host, 'rb') as hf:
+FileNotFoundError: [Errno 2] No such file or directory: 'tests/vm/zeros'

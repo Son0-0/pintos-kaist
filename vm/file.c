@@ -57,7 +57,8 @@ do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offse
   
   uint64_t va = addr;
   file = file_reopen(file);
-  uint64_t file_size = file_length(file);
+
+  uint64_t file_size= file_length(file);
 
   while (0 < file_size) {
     struct dummy *aux = (struct dummy*)malloc(sizeof(struct dummy));
@@ -65,7 +66,6 @@ do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offse
     aux->read_bytes = file_size < PGSIZE ? file_size : PGSIZE;
     aux->zero_bytes = PGSIZE - aux->read_bytes;
     aux->ofs = offset;
-    printf("rbyte: %p / zbyte: %p sum(rbyte, zbyte): %p\n", aux->read_bytes, aux->zero_bytes, aux->read_bytes + aux->zero_bytes);
 
     if (!vm_alloc_page_with_initializer(VM_FILE, va, writable, lazy_load_segment, aux)) {
       return NULL;
@@ -82,25 +82,24 @@ do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offse
 void
 do_munmap (void *addr) {
   struct page *page = spt_find_page(&thread_current()->spt, addr);
-  
-  if (page) {
-    struct file *file = page->file.file;
-    size_t size = page->file.file_size;
-    file_seek(page->file.file, page->file.file_ofs);
-    uint64_t write_bytes;
+  struct file *file = thread_current()->fdt[page->fd];
+  size_t size = page->file_size;
 
-    while (0 < size) {
-      if (page && page->frame) {
-        write_bytes = size = size < PGSIZE ? size : PGSIZE;
-        if (size != file_write(page->frame->kva, page->file.file, write_bytes))
-          exit(-1);
+  file = file_reopen(file);
+  file_seek(file, page->file_ofs);
+  uint64_t write_bytes;
+
+  while (0 < size) {
+    struct page *cur_page = spt_find_page(&thread_current()->spt, addr);
+    if (page && page->frame) {
+      write_bytes = size < PGSIZE ? size : PGSIZE;
+      if (size != file_write(file, page->frame->kva, write_bytes)) {
+        exit(-1);
       }
-      size -= write_bytes;
-      addr += PGSIZE;
-      vm_dealloc_page(page);
-      page = spt_find_page(&thread_current()->spt, addr);
     }
-
+    size -= write_bytes;
+    addr += PGSIZE;
+    destroy(page);
   }
 
 }

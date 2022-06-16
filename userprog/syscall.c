@@ -270,23 +270,25 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset) {
     return NULL;
 
   void *retval = do_mmap(addr, length, writable, file, offset);
+  struct page *found_page = spt_find_page(&thread_current()->spt, addr);
 
   if (retval) {
     struct page *found_page = spt_find_page(&thread_current()->spt, addr);
-    if (found_page) {
-      found_page->file.file = file;
-      found_page->file.file_size = file_length(file);
-      found_page->file.file_ofs = offset;
+    if (found_page && page_get_type(found_page) == VM_FILE) {
+      found_page->fd = fd;
+      found_page->file_size = file_length(file);
+      found_page->file_ofs = offset;
     } else {
       return NULL;
     }
   }
+
   return retval;
 }
 
 void munmap (void *addr) {
   check_address(addr);
-  if (addr == 0 || addr == pg_round_down(addr))
+  if (addr == 0 || addr != pg_round_down(addr))
     exit(-1);
   do_munmap(addr);
 }

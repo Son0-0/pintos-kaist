@@ -50,6 +50,10 @@ struct page {
 	struct hash_elem hash_elem;
   bool writable;
 
+  int fd;
+  size_t file_size;
+  off_t file_ofs;
+
 	/* Per-type data are binded into the union.
 	 * Each function automatically detects the current union */
 	union {
