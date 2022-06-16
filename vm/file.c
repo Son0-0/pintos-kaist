@@ -89,7 +89,7 @@ do_munmap (void *addr) {
     struct page *cur_page = spt_find_page(&thread_current()->spt, addr);
     if (page) {
       write_bytes = size < PGSIZE ? size : PGSIZE;
-      if (write_bytes != file_write(page->mfile, page->frame->kva, write_bytes)) {
+      if (write_bytes != file_write_at(page->mfile, page->frame->kva, write_bytes, ofs)) {
         return NULL;
       }
     }
@@ -98,7 +98,6 @@ do_munmap (void *addr) {
     addr += PGSIZE;
     destroy(page);
   }
-
 }
 
 static bool

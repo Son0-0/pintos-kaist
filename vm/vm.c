@@ -6,6 +6,7 @@
 
 // * Project 3 추가
 #include "threads/mmu.h"
+#include "userprog/syscall.h"
 
 /* Initializes the virtual memory subsystem by invoking each subsystem's
  * intialize codes. */
@@ -301,4 +302,15 @@ bool copy_page(const struct hash_elem *a_, void *aux UNUSED)
   }
 
   return success;
+}
+
+bool munmap_page(const struct hash_elem *a, void *aux UNUSED) {
+  struct page *cur_page = hash_entry(a, struct page, hash_elem);
+  if (cur_page) {
+    struct file *file = cur_page->mfile;
+    if (file) {
+      munmap(cur_page->va);
+    }
+  }
+  return true;
 }

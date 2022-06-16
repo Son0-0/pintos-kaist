@@ -124,5 +124,6 @@ bool page_less (const struct hash_elem *a_, const struct hash_elem *b_, void *au
 unsigned page_hash (const struct hash_elem *p_, void *aux UNUSED);
 void delete_page (const struct hash_elem *a_, void *aux UNUSED);
 bool copy_page (const struct hash_elem *a_, void *aux UNUSED);
+bool munmap_page(const struct hash_elem *a, void *aux UNUSED); // * 추가
 #endif  /* VM_VM_H */
 static struct frame * vm_get_frame (void); // * 추가
