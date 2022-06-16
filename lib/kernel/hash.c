@@ -150,8 +150,6 @@ hash_delete (struct hash *h, struct hash_elem *e) {
 bool
 hash_apply (struct hash *h, hash_action_func *action) {
 	size_t i;
-  int flag_cnt = 0;
-  bool success = true;
 
 	ASSERT (action != NULL);
 
@@ -162,10 +160,10 @@ hash_apply (struct hash *h, hash_action_func *action) {
 		for (elem = list_begin (bucket); elem != list_end (bucket); elem = next) {
 			next = list_next (elem);
 			if (!action (list_elem_to_hash_elem (elem), h->aux))
-        success = false;
+        return false;
 		}
 	}
-  return success;
+  return true;
 }
 
 /* Initializes I for iterating hash table H.

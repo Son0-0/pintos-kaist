@@ -100,6 +100,12 @@ syscall_handler (struct intr_frame *f UNUSED) {
     case SYS_CLOSE:
       close(f->R.rdi);
       break;
+    case SYS_MMAP:
+      f->R.rax = (uint64_t)mmap(f->R.rdi, f->R.rsi, f->R.rdx, f->R.r10, f->R.r8);
+      break;
+    case SYS_MUNMAP:
+      munmap(f->R.rdi);
+      break;
     default:
       exit(-1);
       break;
@@ -256,6 +262,36 @@ void close (int fd) {
   }
 }
 
+void *mmap (void *addr, size_t length, int writable, int fd, off_t offset) {
+  struct page *page = spt_find_page(&thread_current()->spt, addr);
+  struct file *file = thread_current()->fdt[fd];
+
+  if (is_kernel_vaddr(addr) || addr == 0 || addr != pg_round_down(addr) || length == 0 || page || fd == 1 || fd == 0 || !file)
+    return NULL;
+
+  void *retval = do_mmap(addr, length, writable, file, offset);
+
+  if (retval) {
+    struct page *found_page = spt_find_page(&thread_current()->spt, addr);
+    if (found_page) {
+      found_page->file.file = file;
+      found_page->file.file_size = length;
+      found_page->file.file_ofs = offset;
+    } else {
+      return NULL;
+    }
+  }
+  
+  return retval;
+}
+
+void munmap (void *addr) {
+  check_address(addr);
+  if (addr == 0 || addr == pg_round_down(addr))
+    exit(-1);
+  do_munmap(addr);
+}
+
 void check_address(void *addr) {
   struct thread *cur = thread_current();
 #ifdef VM
@@ -284,6 +320,6 @@ void check_valid_buffer(void *buffer, unsigned size, bool to_write) {
 
 void check_valid_string(const void *str, unsigned size) {
   check_address(str);
-  if (spt_find_page(&thread_current()->spt, str) == NULL)
+  if (!spt_find_page(&thread_current()->spt, str))
     exit(-1);
 }

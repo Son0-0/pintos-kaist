@@ -54,18 +54,28 @@ file_backed_destroy (struct page *page) {
 /* Do the mmap */
 void *
 do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offset) {
+  
   uint64_t va = addr;
-  while (0 < length) {
+  file = file_reopen(file);
+  uint64_t read_byte = file_length(file);
+  uint64_t zero_byte = length - read_byte;
+
+  while (0 < read_byte) {
+    printf("addr: %p length: %p offset: %p\n", addr, length, offset);
     struct dummy *aux = (struct dummy*)malloc(sizeof(struct dummy));
     aux->file = file;
-    aux->read_bytes = length < PGSIZE ? length : PGSIZE;
+    aux->read_bytes = read_byte < PGSIZE ? read_byte : PGSIZE;
     aux->zero_bytes = PGSIZE - aux->read_bytes;
+    aux->ofs = offset;
+    printf("rbyte: %p zbyte: %p ofs: %p\n", aux->read_bytes, aux->zero_bytes, aux->ofs);
 
     if (!vm_alloc_page_with_initializer(VM_FILE, va, writable, lazy_load_segment, aux)) {
       return NULL;
     }
 
-    length -= PGSIZE;
+    offset += aux->read_bytes;
+    read_byte -= aux->read_bytes;
+    zero_byte -= aux->zero_bytes;
     va += PGSIZE;
   }
   return addr;
@@ -74,23 +84,22 @@ do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offse
 /* Do the munmap */
 void
 do_munmap (void *addr) {
-
   struct page *page = spt_find_page(&thread_current()->spt, addr);
+  
   if (page) {
-    void *addr = page->file.file_addr;
+    void *addr = page->file.file;
     size_t size = page->file.file_size;
+    file_seek(page->file.file, page->file.file_ofs);
 
     while (0 < size) {
       if (page && page->frame) {
         size = page->file.file_size < PGSIZE ? page->file.file_size : PGSIZE;
-        if (size != file_write(page->frame->kva, page->file.file_addr, size))
+        if (size != file_write(page->frame->kva, page->file.file, size))
           exit(-1);
-        palloc_free_page(page->frame->kva);
-        free(page->frame);
       }
       size -= PGSIZE;
       addr += PGSIZE;
-      free(page);
+      vm_dealloc_page(page);
       page = spt_find_page(&thread_current()->spt, addr);
     }
 

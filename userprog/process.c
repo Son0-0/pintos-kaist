@@ -754,8 +754,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		aux->file = file;
 		aux->read_bytes = page_read_bytes; // * 혜진
 		aux->zero_bytes = page_zero_bytes;
-		aux->upage = upage;
-		aux->writable = writable;
     aux->ofs = ofs;
 
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage, writable, lazy_load_segment, aux))

@@ -41,5 +41,6 @@
     "typeinfo": "c",
     "string": "c",
     "vm.h": "c"
-  }
+  },
+  "C_Cpp.errorSquiggles": "Disabled"
 }

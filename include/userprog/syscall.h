@@ -28,6 +28,11 @@ void seek (int fd, unsigned position);
 unsigned tell (int fd);
 void close (int fd);
 
+// * VM 추가
+void check_valid_buffer(void *buffer, unsigned size, bool to_write);
+void check_valid_string(const void *str, unsigned size);
 
+void *mmap (void *addr, size_t length, int writable, int fd, off_t offset);
+void munmap (void *addr);
 
 #endif /* userprog/syscall.h */

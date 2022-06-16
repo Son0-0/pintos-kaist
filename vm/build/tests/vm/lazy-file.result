@@ -1,2 +1,2 @@
 FAIL
-run: mmap "small.txt": FAILED
+Run produced no output at all

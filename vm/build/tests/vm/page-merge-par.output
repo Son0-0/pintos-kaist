@@ -18,31 +18,32 @@ Executing 'page-merge-par':
 (page-merge-par) init
 (page-merge-par) sort chunk 0
 (page-merge-par) sort chunk 1
-child-sort: exit(-1)
-(page-merge-par) sort chunk 2
-(child-sort) open "buf1": FAILED
+(child-sort) open "buf0": FAILED
 child-sort: exit(1)
 child-sort: exit(123)
+(page-merge-par) sort chunk 2
 (page-merge-par) sort chunk 3
 child-sort: exit(123)
 (page-merge-par) sort chunk 4
-(page-merge-par) sort chunk 5
 child-sort: exit(123)
+(page-merge-par) sort chunk 5
+(child-sort) open "buf4": FAILED
+child-sort: exit(1)
 (page-merge-par) sort chunk 6
 child-sort: exit(123)
 (page-merge-par) sort chunk 7
-child-sort: exit(123)
+child-sort: exit(-1)
 (page-merge-par) wait for child 0
 (page-merge-par) wait for child 0: FAILED
 page-merge-par: exit(1)
 Execution of 'page-merge-par' complete.
-Timer: 209 ticks
-Thread: 30 idle ticks, 45 kernel ticks, 134 user ticks
+Timer: 202 ticks
+Thread: 30 idle ticks, 42 kernel ticks, 130 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 2166 reads, 5946 writes
+hd0:1: 1909 reads, 5690 writes
 hd1:0: 218 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1556 characters output
+Console: 1587 characters output
 Keyboard: 0 keys pressed
 Exception: 1 page faults
 Powering off...

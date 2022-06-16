@@ -17,16 +17,14 @@ Executing 'mmap-clean':
 (mmap-clean) begin
 (mmap-clean) open "sample.txt"
 (mmap-clean) mmap "sample.txt"
-(mmap-clean) mmap "sample.txt": FAILED
-mmap-clean: exit(1)
-Execution of 'mmap-clean' complete.
-Timer: 62 ticks
-Thread: 30 idle ticks, 29 kernel ticks, 3 user ticks
-hd0:0: 0 reads, 0 writes
-hd0:1: 115 reads, 262 writes
-hd1:0: 112 reads, 0 writes
-hd1:1: 0 reads, 0 writes
-Console: 1100 characters output
-Keyboard: 0 keys pressed
-Exception: 0 page faults
-Powering off...
+mmap-clean: exit(-1)
+Kernel PANIC at ../../threads/malloc.c:249 in block_to_arena(): assertion `a->magic == ARENA_MAGIC' failed.
+Call stack: 0x80042186e8 0x800420c8b2 0x800420c67b 0x800421f66e 0x800421c21f 0x8004207450 0x800421d931 0x800421d477 0x8004209684 0x8004209aa2 0x8004221b32 0x800422194a 0x800421d444 0x8004209684 0x8004209aa2 0x4001ef 0x400f76 0x400fbf 0Interrupt 0x0d (#GP General Protection Exception) at rip=8004215722
+ cr2=0000008000000000 error=               0
+rax 0000800424215800 rbx 0000000054321000 rcx 00000080040b8000 rdx 00000000000003d4
+rsp 0000008004242b00 rbp 0000008004242b10 rsi 000000000000cb0f rdi 0000000000000000
+rip 0000008004215722 r8 0000008004242a18  r9 000000800421bb71 r10 0000000000000002
+r11 0000000000000206 r12 0000008004a28000 r13 0000000000000000 r14 00008004242f1000
+r15 0000010000000000 rflags 00000006
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Kernel PANIC recursion at ../../userprog/exception.c:97 in kill().
