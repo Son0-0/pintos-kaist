@@ -57,25 +57,22 @@ do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offse
   
   uint64_t va = addr;
   file = file_reopen(file);
-  uint64_t read_byte = file_length(file);
-  uint64_t zero_byte = length - read_byte;
+  uint64_t file_size = file_length(file);
 
-  while (0 < read_byte) {
-    printf("addr: %p length: %p offset: %p\n", addr, length, offset);
+  while (0 < file_size) {
     struct dummy *aux = (struct dummy*)malloc(sizeof(struct dummy));
     aux->file = file;
-    aux->read_bytes = read_byte < PGSIZE ? read_byte : PGSIZE;
+    aux->read_bytes = file_size < PGSIZE ? file_size : PGSIZE;
     aux->zero_bytes = PGSIZE - aux->read_bytes;
     aux->ofs = offset;
-    printf("rbyte: %p zbyte: %p ofs: %p\n", aux->read_bytes, aux->zero_bytes, aux->ofs);
+    printf("rbyte: %p / zbyte: %p sum(rbyte, zbyte): %p\n", aux->read_bytes, aux->zero_bytes, aux->read_bytes + aux->zero_bytes);
 
     if (!vm_alloc_page_with_initializer(VM_FILE, va, writable, lazy_load_segment, aux)) {
       return NULL;
     }
 
     offset += aux->read_bytes;
-    read_byte -= aux->read_bytes;
-    zero_byte -= aux->zero_bytes;
+    file_size -= aux->read_bytes;
     va += PGSIZE;
   }
   return addr;
@@ -87,17 +84,18 @@ do_munmap (void *addr) {
   struct page *page = spt_find_page(&thread_current()->spt, addr);
   
   if (page) {
-    void *addr = page->file.file;
+    struct file *file = page->file.file;
     size_t size = page->file.file_size;
     file_seek(page->file.file, page->file.file_ofs);
+    uint64_t write_bytes;
 
     while (0 < size) {
       if (page && page->frame) {
-        size = page->file.file_size < PGSIZE ? page->file.file_size : PGSIZE;
-        if (size != file_write(page->frame->kva, page->file.file, size))
+        write_bytes = size = size < PGSIZE ? size : PGSIZE;
+        if (size != file_write(page->frame->kva, page->file.file, write_bytes))
           exit(-1);
       }
-      size -= PGSIZE;
+      size -= write_bytes;
       addr += PGSIZE;
       vm_dealloc_page(page);
       page = spt_find_page(&thread_current()->spt, addr);

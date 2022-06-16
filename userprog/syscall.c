@@ -275,13 +275,12 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset) {
     struct page *found_page = spt_find_page(&thread_current()->spt, addr);
     if (found_page) {
       found_page->file.file = file;
-      found_page->file.file_size = length;
+      found_page->file.file_size = file_length(file);
       found_page->file.file_ofs = offset;
     } else {
       return NULL;
     }
   }
-  
   return retval;
 }
 
