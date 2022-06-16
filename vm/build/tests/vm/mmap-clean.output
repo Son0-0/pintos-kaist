@@ -24,8 +24,8 @@ Executing 'mmap-clean':
 (mmap-clean) munmap wrote back clean page: FAILED
 mmap-clean: exit(1)
 Execution of 'mmap-clean' complete.
-Timer: 64 ticks
-Thread: 30 idle ticks, 30 kernel ticks, 4 user ticks
+Timer: 63 ticks
+Thread: 30 idle ticks, 29 kernel ticks, 4 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 121 reads, 265 writes
 hd1:0: 112 reads, 0 writes

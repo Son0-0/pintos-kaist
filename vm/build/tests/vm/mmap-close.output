@@ -27,5 +27,5 @@ hd1:0: 109 reads, 0 writes
 hd1:1: 0 reads, 0 writes
 Console: 1062 characters output
 Keyboard: 0 keys pressed
-Exception: 1 page faults
+Exception: 0 page faults
 Powering off...
