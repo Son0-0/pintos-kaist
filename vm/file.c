@@ -54,11 +54,9 @@ file_backed_destroy (struct page *page) {
 /* Do the mmap */
 void *
 do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offset) {
-  
   uint64_t va = addr;
-  file = file_reopen(file);
-
   uint64_t file_size= file_length(file);
+  file = file_reopen(file);
 
   while (0 < file_size) {
     struct dummy *aux = (struct dummy*)malloc(sizeof(struct dummy));
@@ -82,21 +80,20 @@ do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offse
 void
 do_munmap (void *addr) {
   struct page *page = spt_find_page(&thread_current()->spt, addr);
-  struct file *file = thread_current()->fdt[page->fd];
   size_t size = page->file_size;
 
-  file = file_reopen(file);
-  file_seek(file, page->file_ofs);
   uint64_t write_bytes;
+  uint64_t ofs = page->file_ofs;
 
   while (0 < size) {
     struct page *cur_page = spt_find_page(&thread_current()->spt, addr);
-    if (page && page->frame) {
+    if (page) {
       write_bytes = size < PGSIZE ? size : PGSIZE;
-      if (size != file_write(file, page->frame->kva, write_bytes)) {
-        exit(-1);
+      if (write_bytes != file_write(page->mfile, page->frame->kva, write_bytes)) {
+        return NULL;
       }
     }
+    ofs += write_bytes;
     size -= write_bytes;
     addr += PGSIZE;
     destroy(page);
@@ -112,10 +109,10 @@ lazy_load_segment (struct page *page, struct dummy *aux) {
 	/* TODO: VA is available when calling this function. */
 	if (file_read_at(aux->file, page->frame->kva, aux->read_bytes, aux->ofs) != (int) aux->read_bytes) {
     palloc_free_page (page->frame->kva);
-    free(aux);
+    // free(aux);
 		return false;
 	}
 	memset (page->frame->kva + aux->read_bytes, 0, aux->zero_bytes);
-  free(aux);
+  // free(aux);
   return true;
 }

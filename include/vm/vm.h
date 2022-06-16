@@ -50,7 +50,7 @@ struct page {
 	struct hash_elem hash_elem;
   bool writable;
 
-  int fd;
+  struct file *mfile;
   size_t file_size;
   off_t file_ofs;
 
