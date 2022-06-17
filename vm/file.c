@@ -87,9 +87,9 @@ do_munmap (void *addr) {
 
   while (0 < size) {
     struct page *cur_page = spt_find_page(&thread_current()->spt, addr);
-    if (page) {
-      write_bytes = size < PGSIZE ? size : PGSIZE;
-      if (write_bytes != file_write_at(page->mfile, page->frame->kva, write_bytes, ofs)) {
+    write_bytes = size < PGSIZE ? size : PGSIZE;
+    if (page && !pml4_is_dirty (&thread_current()->pml4, addr) && cur_page->writable) {
+      if (write_bytes != file_write_at(page->mfile, cur_page->frame->kva, write_bytes, ofs)) {
         return NULL;
       }
     }

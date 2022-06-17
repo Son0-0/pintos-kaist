@@ -4,7 +4,7 @@ Kernel command line: -q -f put swap-file put large.txt run swap-file
 Pintos booting with: 
 	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
 	ext_mem: 0x100000 ~ 0x7e0000 (Usable: 7,040 kB)
-Calibrating timer...  52,377,600 loops/s.
+Calibrating timer...  45,568,000 loops/s.
 hd0:0: detected 329 sector (164 kB) disk, model "QEMU HARDDISK", serial "QM00001"
 hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
 hd1:0: detected 7,931 sector (3 MB) disk, model "QEMU HARDDISK", serial "QM00003"
@@ -18,7 +18,7 @@ Executing 'swap-file':
 (swap-file) open "large.txt"
 (swap-file) mmap "large.txt"
 Kernel PANIC at ../../vm/vm.c:152 in vm_get_frame(): todo
-Call stack: 0x80042186e8 0x80042217f5 0x8004221ae7 0x800422197e 0x800421d467 0x8004209684 0x8004209aa2 0x4001f3 0x400d85 0x400dce 0Interrupt 0x0d (#GP General Protection Exception) at rip=8004215722
+Call stack: 0x80042186e8 0x8004221814 0x8004221b06 0x800422199d 0x800421d467 0x8004209684 0x8004209aa2 0x4001f3 0x400d85 0x400dce 0Interrupt 0x0d (#GP General Protection Exception) at rip=8004215722
  cr2=00000000101ce000 error=               0
 rax 0000800423c15800 rbx 0000800423e07800 rcx 00000080040b8000 rdx 00000000000003d4
 rsp 000000800423cd70 rbp 000000800423cd80 rsi 000000000000b30f rdi 0000000000000000
@@ -27,11 +27,11 @@ r11 0000000000000206 r12 0000800423ef1800 r13 0000800420aec800 r14 0000800423cf1
 r15 0000010000000000 rflags 00000006
 es: 0010 ds: 0010 cs: 0008 ss: 0010
 Kernel PANIC recursion at ../../userprog/exception.c:97 in kill().
-Timer: 320 ticks
-Thread: 30 idle ticks, 212 kernel ticks, 78 user ticks
+Timer: 718 ticks
+Thread: 30 idle ticks, 479 kernel ticks, 209 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 7728 reads, 15900 writes
 hd1:0: 7931 reads, 0 writes
 hd1:1: 0 reads, 0 writes
-Console: 1776 characters output
+Console: 1777 characters output
 Key

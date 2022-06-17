@@ -1,2 +1,2 @@
 FAIL
-run: munmap wrote back clean page: FAILED
+run: mmap "sample.txt": FAILED
