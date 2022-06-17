@@ -88,7 +88,7 @@ do_munmap (void *addr) {
   while (0 < size) {
     struct page *cur_page = spt_find_page(&thread_current()->spt, addr);
     write_bytes = size < PGSIZE ? size : PGSIZE;
-    if (page && !pml4_is_dirty (&thread_current()->pml4, addr) && cur_page->writable) {
+    if (cur_page && !pml4_is_dirty (&thread_current()->pml4, addr) && cur_page->writable) {
       if (write_bytes != file_write_at(page->mfile, cur_page->frame->kva, write_bytes, ofs)) {
         return NULL;
       }
@@ -96,7 +96,7 @@ do_munmap (void *addr) {
     ofs += write_bytes;
     size -= write_bytes;
     addr += PGSIZE;
-    destroy(page);
+    destroy(cur_page);
   }
 }
 
@@ -108,10 +108,10 @@ lazy_load_segment (struct page *page, struct dummy *aux) {
 	/* TODO: VA is available when calling this function. */
 	if (file_read_at(aux->file, page->frame->kva, aux->read_bytes, aux->ofs) != (int) aux->read_bytes) {
     palloc_free_page (page->frame->kva);
-    // free(aux);
+    free(aux);
 		return false;
 	}
 	memset (page->frame->kva + aux->read_bytes, 0, aux->zero_bytes);
-  // free(aux);
+  free(aux);
   return true;
 }

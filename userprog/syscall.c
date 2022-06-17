@@ -263,13 +263,16 @@ void close (int fd) {
 }
 
 void *mmap (void *addr, size_t length, int writable, int fd, off_t offset) {
-  if (is_kernel_vaddr(addr) || USER_STACK < addr || length < offset || addr == 0 || addr != pg_round_down(addr) || length == 0 || fd == 1 || fd == 0)
+  if (is_kernel_vaddr(addr) || KERN_BASE - USER_STACK < length || addr == 0 || addr != pg_round_down(addr) || length <= 0 || fd <= 1)
     return NULL;
   
   struct page *page = spt_find_page(&thread_current()->spt, addr);
   struct file *file = file_reopen(thread_current()->fdt[fd]);
 
   if (page || !file)
+    return NULL;
+
+  if (file_length(file) < offset)
     return NULL;
 
   void *retval = do_mmap(addr, length, writable, file, offset);
@@ -289,7 +292,9 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset) {
 }
 
 void munmap (void *addr) {
-  check_address(addr);
+  if (addr == NULL || is_kernel_vaddr(addr) || spt_find_page(&thread_current()->spt, addr) == NULL) {
+    exit(-1);
+  }
   do_munmap(addr);
 }
 
