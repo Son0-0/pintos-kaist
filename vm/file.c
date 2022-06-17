@@ -88,7 +88,8 @@ do_munmap (void *addr) {
   while (0 < size) {
     struct page *cur_page = spt_find_page(&thread_current()->spt, addr);
     write_bytes = size < PGSIZE ? size : PGSIZE;
-    if (cur_page && !pml4_is_dirty (&thread_current()->pml4, addr) && cur_page->writable) {
+    if (cur_page && pml4_is_dirty (thread_current()->pml4, addr)) { // * 준혁 초이
+      pml4_set_dirty (thread_current()->pml4, addr, false);
       if (write_bytes != file_write_at(page->mfile, cur_page->frame->kva, write_bytes, ofs)) {
         return NULL;
       }
