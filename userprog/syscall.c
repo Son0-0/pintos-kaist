@@ -53,9 +53,6 @@ void
 syscall_handler (struct intr_frame *f UNUSED) {
 	// TODO: Your implementation goes here.
 
-  // * VM Stack Growth 추가 Son0-0
-  // thread_current()->rsp = f->rsp;
-  
   switch (f->R.rax) {
     case SYS_HALT:
       halt();
@@ -125,6 +122,7 @@ void exit(int status) {
    * thread 종료
    */ 
   struct thread *cur = thread_current();
+
   cur->exit_status = status;
   printf("%s: exit(%d)\n", cur->name, status);
   thread_exit();
@@ -197,6 +195,9 @@ int filesize (int fd) {
 }
 
 int read (int fd, void *buffer, unsigned size) {
+  // puts("======= read ======");
+  // printf("fd: %d buffer: %p size: %p\n", fd, buffer, size);
+  // puts("======= read ======");
   check_valid_buffer(buffer, size, true);
   if (fd == 1) {
     return -1;
@@ -204,6 +205,7 @@ int read (int fd, void *buffer, unsigned size) {
 
   if (fd == 0) {
     lock_acquire(&filesys_lock);
+    // puts("here fd == 0");
     int byte = input_getc();
     lock_release(&filesys_lock);
     return byte;
@@ -271,21 +273,7 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset) {
 
   if (page || !file)
     return NULL;
-
-  void *retval = do_mmap(addr, length, writable, file, offset);
-  struct page *found_page = spt_find_page(&thread_current()->spt, addr);
-
-  // if (retval) {
-  //   if (found_page && page_get_type(found_page) == VM_FILE) {
-  //     found_page->mfile = file;
-  //     found_page->file_size = file_length(file);
-  //     found_page->file_ofs = offset;
-  //   } else {
-  //     return NULL;
-  //   }
-  // }
-
-  return retval;
+  return do_mmap(addr, length, writable, file, offset);
 }
 
 void munmap (void *addr) {
@@ -298,23 +286,34 @@ void munmap (void *addr) {
 void check_address(void *addr) {
   struct thread *cur = thread_current();
 #ifdef VM
-  if (addr == NULL || is_kernel_vaddr(addr) || spt_find_page(&cur->spt, addr) == NULL) {
+  if (addr == NULL || is_kernel_vaddr(addr)) { // spt_find_page(&cur->spt, addr) == NULL
     exit(-1);
+    // printf("addr: %p\n", addr);
+    // printf("kernel? %d\n", is_kernel_vaddr(addr));
+    // if (spt_find_page(&cur->spt, addr) == NULL)
+    //   printf("page not found\n");
   }
 #else
-  if (addr == NULL || is_kernel_vaddr(addr) || pml4_get_page(cur->pml4, addr) == NULL)
+  if (addr == NULL || is_kernel_vaddr(addr) || pml4_get_page(cur->pml4, addr) == NULL) {
     exit(-1);
+  }
 #endif
 }
 
 void check_valid_buffer(void *buffer, unsigned size, bool to_write) {
   check_address(buffer);
-
   uint64_t last_page = (uint64_t)(buffer + size);
   uint64_t addr = buffer;
 
   while (addr <= last_page) {
     struct page *cur = spt_find_page(&thread_current()->spt, addr);
+    // if (cur) {
+    //   if (!to_write) { //  != cur->writable
+    //     printf("to_wrtie: %d | cur->writable: %d\n", to_write, cur->writable);
+    //     puts("asdasd");
+    //     exit(-1);
+    //   }
+    // }
     if (!cur || (to_write && !cur->writable))
       exit(-1);
     addr += PGSIZE;
