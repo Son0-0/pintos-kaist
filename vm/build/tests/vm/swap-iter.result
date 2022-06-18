@@ -1,13 +1,66 @@
 FAIL
-Kernel panic in run: PANIC at ../../vm/vm.c:152 in vm_get_frame(): todo
-Call stack: 0x80042186e8 0x800422185a 0x8004221b4c 0x80042219e3 0x800421d467 0x8004209684 0x8004209aa2 0x400e2e 0x400e77
-Translation of call stack:
-0x00000080042186e8: debug_panic (lib/kernel/debug.c:32)
-0x000000800422185a: vm_get_frame (vm/vm.c:154)
-0x0000008004221b4c: vm_do_claim_page (vm/vm.c:227)
-0x00000080042219e3: vm_try_handle_fault (vm/vm.c:189)
-0x000000800421d467: page_fault (userprog/exception.c:147)
-0x0000008004209684: intr_handler (threads/interrupt.c:352)
-0x0000008004209aa2: intr_entry (threads/intr-stubs.o:?)
-0x0000000000400e2e: (unknown)
-0x0000000000400e77: (unknown)
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (swap-iter) begin
+  (swap-iter) write sparsely over page 0
+  (swap-iter) write sparsely over page 512
+  (swap-iter) write sparsely over page 1024
+  (swap-iter) write sparsely over page 1536
+  (swap-iter) write sparsely over page 2048
+  (swap-iter) write sparsely over page 2560
+  (swap-iter) write sparsely over page 3072
+  (swap-iter) write sparsely over page 3584
+  (swap-iter) write sparsely over page 4096
+  (swap-iter) write sparsely over page 4608
+  (swap-iter) open "large.txt"
+  (swap-iter) mmap "large.txt"
+  (swap-iter) check consistency in page 0
+  (swap-iter) check consistency in page 512
+  (swap-iter) check consistency in page 1024
+  (swap-iter) check consistency in page 1536
+  (swap-iter) check consistency in page 2048
+  (swap-iter) check consistency in page 2560
+  (swap-iter) check consistency in page 3072
+  (swap-iter) check consistency in page 3584
+  (swap-iter) check consistency in page 4096
+  (swap-iter) check consistency in page 4608
+  (swap-iter) end
+Differences in `diff -u' format:
+  (swap-iter) begin
+  (swap-iter) write sparsely over page 0
+  (swap-iter) write sparsely over page 512
+  (swap-iter) write sparsely over page 1024
+- (swap-iter) write sparsely over page 1536
+- (swap-iter) write sparsely over page 2048
+- (swap-iter) write sparsely over page 2560
+- (swap-iter) write sparsely over page 3072
+- (swap-iter) write sparsely over page 3584
+- (swap-iter) write sparsely over page 4096
+- (swap-iter) write sparsely over page 4608
+- (swap-iter) open "large.txt"
+- (swap-iter) mmap "large.txt"
+- (swap-iter) check consistency in page 0
+- (swap-iter) check consistency in page 512
+- (swap-iter) check consistency in page 1024
+- (swap-iter) check consistency in page 1536
+- (swap-iter) check consistency in page 2048
+- (swap-iter) check consistency in page 2560
+- (swap-iter) check consistency in page 3072
+- (swap-iter) check consistency in page 3584
+- (swap-iter) check consistency in page 4096
+- (swap-iter) check consistency in page 4608
+- (swap-iter) end
++ 0x400000 VM_TYPE: 1
++ 0x1bee000 VM_TYPE: 1
++ swap-iter: dying due to interrupt 0x0d (#GP General Protection Exception).
++ Interrupt 0x0d (#GP General Protection Exception) at rip=4003c1
++  cr2=000000000040014d error=               0
++ rax 00000000007edfa0 rbx 0000800424007800 rcx 00000000000004b7 rdx 00000000004b7000
++ rsp 000000004747ff70 rbp 000000004747ff90 rsi 0000000001bedfc0 rdi 0000000000000001
++ rip 00000000004003c1 r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
++ r11 0000000000000206 r12 00008004240f1800 r13 0000800420aec800 r14 0000800423ef1000
++ r15 0000010000000000 rflags 00000a03
++ es: 001b ds: 001b cs: 0023 ss: 001b
+
+(Process exit codes are excluded for matching purposes.)

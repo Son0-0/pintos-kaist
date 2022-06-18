@@ -53,6 +53,7 @@ struct page {
   struct file *mfile;
   size_t file_size;
   off_t file_ofs;
+  uint64_t read_bytes;
 
 	/* Per-type data are binded into the union.
 	 * Each function automatically detects the current union */

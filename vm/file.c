@@ -37,12 +37,26 @@ file_backed_initializer (struct page *page, enum vm_type type, void *kva) {
 static bool
 file_backed_swap_in (struct page *page, void *kva) {
 	struct file_page *file_page UNUSED = &page->file;
+  if (file_read_at(page->mfile, kva, page->read_bytes, page->file_ofs) != (int) page->read_bytes) {
+    palloc_free_page(kva);
+  }
+  memset(kva + page->read_bytes, 0, PGSIZE - page->read_bytes);
 }
 
 /* Swap out the page by writeback contents to the file. */
 static bool
 file_backed_swap_out (struct page *page) {
 	struct file_page *file_page UNUSED = &page->file;
+
+  if (page && page->frame && pml4_is_dirty(thread_current()->pml4, page->va)) {
+    if (page->read_bytes != file_write_at(page->mfile, page->frame->kva, page->read_bytes, page->file_ofs)) {
+      return false;
+    }
+    pml4_set_dirty (thread_current()->pml4, page->va, false);
+  }
+  pml4_clear_page(thread_current()->pml4, page->va);
+  page->frame = NULL;
+  return true;
 }
 
 /* Destory the file backed page. PAGE will be freed by the caller. */
@@ -56,7 +70,8 @@ void *
 do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offset) {
   uint64_t va = addr;
   uint64_t file_size= file_length(file);
-  file = file_reopen(file);
+  // printf("addr: %p, file_size: %p\n", addr, file_size);
+  int cnt = 1;
 
   while (0 < file_size) {
     struct dummy *aux = (struct dummy*)malloc(sizeof(struct dummy));
@@ -65,8 +80,16 @@ do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offse
     aux->zero_bytes = PGSIZE - aux->read_bytes;
     aux->ofs = offset;
 
+    // printf("cnt: %d rb: %p | zb: %p | ofs: %p\n", cnt++, aux->read_bytes, aux->zero_bytes, aux->ofs);
+
     if (!vm_alloc_page_with_initializer(VM_FILE, va, writable, lazy_load_segment, aux)) {
       return NULL;
+    } else {
+      struct page *page = spt_find_page(&thread_current()->spt, va);
+      page->mfile = file;
+      page->file_size = file_size;
+      page->file_ofs = offset;
+      page->read_bytes = aux->read_bytes;
     }
 
     offset += aux->read_bytes;
@@ -80,6 +103,7 @@ do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offse
 void
 do_munmap (void *addr) {
   struct page *page = spt_find_page(&thread_current()->spt, addr);
+  struct file *cfile = page->mfile;
   size_t size = page->file_size;
 
   uint64_t write_bytes;
@@ -88,17 +112,19 @@ do_munmap (void *addr) {
   while (0 < size) {
     struct page *cur_page = spt_find_page(&thread_current()->spt, addr);
     write_bytes = size < PGSIZE ? size : PGSIZE;
-    if (cur_page && pml4_is_dirty (thread_current()->pml4, addr)) { // * 준혁 초이
-      pml4_set_dirty (thread_current()->pml4, addr, false);
+    if (cur_page && cur_page->frame && pml4_is_dirty (thread_current()->pml4, addr)) { // * 준혁 초이
+      // * dirty bit가 true인 경우 file에 write, 그 후 bit 초기화
       if (write_bytes != file_write_at(page->mfile, cur_page->frame->kva, write_bytes, ofs)) {
         return NULL;
       }
+      pml4_set_dirty (thread_current()->pml4, addr, false);
     }
     ofs += write_bytes;
     size -= write_bytes;
     addr += PGSIZE;
     destroy(cur_page);
   }
+  destroy(page);
 }
 
 static bool

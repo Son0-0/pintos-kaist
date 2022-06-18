@@ -120,7 +120,20 @@ vm_get_victim(void)
   struct frame *victim = NULL;
   /* TODO: The policy for eviction is up to you. */
 
-  return victim;
+  struct list_elem *cur_elem = list_begin(&frame_list);
+  while (cur_elem != list_end(&frame_list)) {
+    struct frame *cur_f = list_entry(cur_elem, struct frame, frame_elem);
+    if (thread_current()->stack_btm <= cur_f->page->va && cur_f->page->va <= USER_STACK) {
+      cur_elem = list_next(cur_elem);
+    }
+    else {
+      printf("%p VM_TYPE: %d\n", cur_f->page->va, page_get_type(cur_f->page));
+      list_remove(cur_elem);
+      return cur_f;
+    }
+  }
+  // struct list_elem *cur_elem = list_pop_front(&frame_list);
+  // return list_entry(cur_elem, struct frame, frame_elem);
 }
 
 /* Evict one page and return the corresponding frame.
@@ -130,8 +143,12 @@ vm_evict_frame(void)
 {
   struct frame *victim UNUSED = vm_get_victim();
   /* TODO: swap out the victim and return the evicted frame. */
-
+  // printf("victim->addr: %p\n", victim->kva);
+  if(swap_out(victim->page))
+    return victim;
   return NULL;
+  // pml4_clear_page(thread_current()->pml4, victim->page->va);
+  // victim->page->frame = NULL;
 }
 
 /* palloc() and get frame. If there is no available page, evict the page
@@ -143,19 +160,17 @@ vm_get_frame(void)
 {
   struct frame *frame = (struct frame *)malloc(sizeof(struct frame));
   /* TODO: Fill this function. */
-  //연어
   frame->kva = palloc_get_page(PAL_USER);
   frame->page = NULL;
-  if (frame->kva == NULL)
-  {
-    frame = NULL;
-    PANIC("todo");
+  
+  if (frame->kva == NULL) {
+    frame = vm_evict_frame();
+    frame->page = NULL;
   }
   ASSERT(frame != NULL);
   ASSERT(frame->page == NULL);
 
-  // Son0-0
-  // list_push_back(&frame_list, &frame->frame_elem);
+  list_push_back(&frame_list, &frame->frame_elem);
 
   return frame;
 }
@@ -164,6 +179,10 @@ vm_get_frame(void)
 static void
 vm_stack_growth(void *addr UNUSED)
 {
+  // puts("================================");
+  // printf("stack bottom: %p\n", thread_current()->stack_btm);
+  // printf("stack_growth addr: %p\n", addr);
+  // puts("================================");
   vm_alloc_page(VM_ANON, addr, true);
   thread_current()->stack_btm = addr;
 }
@@ -178,19 +197,31 @@ vm_handle_wp(struct page *page UNUSED)
 bool vm_try_handle_fault(struct intr_frame *f UNUSED, void *addr UNUSED,
                          bool user UNUSED, bool write UNUSED, bool not_present UNUSED)
 {
+  // puts(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
   // printf("fault addr: %p user: %d write: %d not_present: %d\n", addr, user, write, not_present);
+  // printf("thread_current()->f.rsp: %p\n", f->rsp);
+  // puts(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
   struct supplemental_page_table *spt UNUSED = &thread_current()->spt;
   struct page *page = spt_find_page(spt, addr); // * ref: 혜진
   /* TODO: Validate the fault */
   /* TODO: Your code goes here */
   if (is_kernel_vaddr(addr))
     return false;
-  if (page && not_present)
+  if (page && not_present) {
+    // printf("addr: %p\n", addr);
     return vm_do_claim_page(page);
+  }
   if (f->rsp - 8 == addr) {
+    // puts(">>>>>>>>>>>>>>>>>>>>> STACK_GROWTH >>>>>>>>>>>>>>>>>>");
     uint64_t size = thread_current()->stack_btm;
     while (addr < size) {
       size -= PGSIZE;
+      // puts("================================");
+      // printf("addr: %p\n", addr);
+      // printf("thread_current()->f.rsp: %p\n", f->rsp);
+      // printf("thread_current()->stack_btm: %p\n", thread_current()->stack_btm);
+      // hex_dump(f->rsp - 4096, f->rsp, 4096, true);
+      // puts("================================");
       vm_stack_growth(size);
       if (spt_find_page(spt, size)) {
         if(!vm_claim_page(size))
@@ -229,7 +260,7 @@ vm_do_claim_page(struct page *page)
   /* Set links */
   frame->page = page;
   page->frame = frame;
-
+  
   /* TODO: Insert page table entry to map page's VA to frame's PA. */
   pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable); // * ref: 혜진
   return swap_in(page, frame->kva);
