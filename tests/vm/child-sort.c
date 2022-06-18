@@ -21,7 +21,7 @@ main (int argc UNUSED, char *argv[])
   size_t i;
 
   quiet = true;
-
+  printf("======%c=====\n",argv[1]);
   CHECK ((handle = open (argv[1])) > 1, "open \"%s\"", argv[1]);
 
   size = read (handle, buf, sizeof buf);

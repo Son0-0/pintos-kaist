@@ -54,6 +54,8 @@ struct page {
   size_t file_size;
   off_t file_ofs;
   uint64_t read_bytes;
+	// 받아! 흥민이형!!
+	size_t slot_idx;
 
 	/* Per-type data are binded into the union.
 	 * Each function automatically detects the current union */
