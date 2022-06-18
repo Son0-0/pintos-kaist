@@ -122,8 +122,10 @@ do_munmap (void *addr) {
     ofs += write_bytes;
     size -= write_bytes;
     addr += PGSIZE;
+    pml4_clear_page(thread_current()->pml4, cur_page->va);
     destroy(cur_page);
   }
+  pml4_clear_page(thread_current()->pml4, page->va);
   destroy(page);
 }
 
@@ -135,6 +137,7 @@ lazy_load_segment (struct page *page, struct dummy *aux) {
 	/* TODO: VA is available when calling this function. */
 	if (file_read_at(aux->file, page->frame->kva, aux->read_bytes, aux->ofs) != (int) aux->read_bytes) {
     palloc_free_page (page->frame->kva);
+    // spt_remove_page(page);
     free(aux);
 		return false;
 	}

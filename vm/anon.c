@@ -46,15 +46,17 @@ anon_swap_in (struct page *page, void *kva) {
 	struct anon_page *anon_page = &page->anon;
 	disk_read(swap_disk, page->slot_idx, kva);
 	bitmap_reset(swap_slot, page->slot_idx);
-	return true
+	return true;
 }
 
 /* Swap out the page by writing contents to the swap disk. */
 static bool
 anon_swap_out (struct page *page) {
+  puts("==================== anon swap_out ===================");
 	struct anon_page *anon_page = &page->anon;
 	disk_sector_t empty_slot = bitmap_scan(swap_slot,1,512,false);
 	if (!empty_slot){
+    puts("==================== empty_slot ===================");
 		return false;
 	}
 	disk_write (swap_disk, empty_slot, page->frame->kva);

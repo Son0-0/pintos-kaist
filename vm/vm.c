@@ -124,19 +124,46 @@ vm_get_victim(void)
   struct list_elem *cur_elem = list_begin(&frame_list);
   while (cur_elem != list_end(&frame_list)) {
     struct frame *cur_f = list_entry(cur_elem, struct frame, frame_elem);
-    if (thread_current()->stack_btm <= cur_f->page->va && cur_f->page->va <= USER_STACK) {
-      cur_elem = list_next(cur_elem);
-    }
-    else if (page_get_type(cur_f->page) == 2) {
-      // printf("%p %p VM_TYPE: %d\n", cur_f->page->va, cur_f->kva, page_get_type(cur_f->page));
+    if(!pml4_is_accessed(thread_current()->pml4, cur_f->page->va)) {
+      if (thread_current()->stack_btm <= cur_f->page->va && cur_f->page->va <= USER_STACK) {
+        cur_elem = list_next(cur_elem);
+        continue;
+      }
       list_remove(cur_elem);
+      puts(">>>>>>>>>>>>>>>>>> return >>>>>>>>>>>>>>>>");
+      printf("%p %p VM_TYPE: %d\n", cur_f->page->va, cur_f->kva, page_get_type(cur_f->page));
       return cur_f;
     } else {
+      pml4_set_accessed(thread_current()->pml4, cur_f->page->va, false);
       cur_elem = list_next(cur_elem);
     }
   }
-  // struct list_elem *cur_elem = list_pop_front(&frame_list);
+
+  // cur_elem = list_begin(&frame_list);
   // return list_entry(cur_elem, struct frame, frame_elem);
+
+  cur_elem = list_begin(&frame_list);
+  while (cur_elem != list_end(&frame_list)) {
+    struct frame *cur_f = list_entry(cur_elem, struct frame, frame_elem);
+    // printf("%p %p VM_TYPE: %d\n", cur_f->page->va, cur_f->kva, page_get_type(cur_f->page));
+    if (thread_current()->stack_btm <= cur_f->page->va && cur_f->page->va <= USER_STACK) {
+      cur_elem = list_next(cur_elem);
+      continue;
+    }
+    if(!pml4_is_accessed(thread_current()->pml4, cur_f->page->va)) {
+      if (thread_current()->stack_btm <= cur_f->page->va && cur_f->page->va <= USER_STACK) {
+        cur_elem = list_next(cur_elem);
+        continue;
+      }
+      list_remove(cur_elem);
+      puts(">>>>>>>>>>>>>>>>>> return >>>>>>>>>>>>>>>>");
+      printf("%p %p VM_TYPE: %d\n", cur_f->page->va, cur_f->kva, page_get_type(cur_f->page));
+      return cur_f;
+    } else {
+      pml4_set_accessed(thread_current()->pml4, cur_f->page->va, false);
+      cur_elem = list_next(cur_elem);
+    }
+  }
 }
 
 /* Evict one page and return the corresponding frame.
@@ -146,15 +173,17 @@ vm_evict_frame(void)
 {
   struct frame *victim UNUSED = vm_get_victim();
   /* TODO: swap out the victim and return the evicted frame. */
-  if (page_get_type(victim->page) == 2) {
-    if(swap_out(victim->page))
-      return victim;
-  }
-  else {
-    victim->page->frame = NULL;
-    pml4_clear_page(thread_current()->pml4, victim->page->va);
+  if(swap_out(victim->page))
     return victim;
-  }
+  // if (page_get_type(victim->page) == 2) {
+  //   if(swap_out(victim->page))
+  //     return victim;
+  // }
+  // else {
+  //   victim->page->frame = NULL;
+  //   pml4_clear_page(thread_current()->pml4, victim->page->va);
+  //   return victim;
+  // }
 
   return NULL;
 }
@@ -210,7 +239,7 @@ bool vm_try_handle_fault(struct intr_frame *f UNUSED, void *addr UNUSED,
   if (page && not_present) {
     return vm_do_claim_page(page);
   }
-  if (f->rsp - 8 == addr) {
+  if (f->rsp - 8 <= addr) {
     uint64_t size = thread_current()->stack_btm;
     while (addr < size) {
       size -= PGSIZE;
