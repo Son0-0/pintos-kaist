@@ -70,7 +70,7 @@ void *
 do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offset) {
   uint64_t va = addr;
   uint64_t file_size= file_length(file);
-  // printf("addr: %p, file_size: %p\n", addr, file_size);
+  
   int cnt = 1;
 
   while (0 < file_size) {
@@ -80,7 +80,7 @@ do_mmap (void *addr, size_t length, int writable, struct file *file, off_t offse
     aux->zero_bytes = PGSIZE - aux->read_bytes;
     aux->ofs = offset;
 
-    // printf("cnt: %d rb: %p | zb: %p | ofs: %p\n", cnt++, aux->read_bytes, aux->zero_bytes, aux->ofs);
+    // printf("cnt: %d | va: %p | rb: %p | zb: %p | ofs: %p\n", cnt++, va, aux->read_bytes, aux->zero_bytes, aux->ofs);
 
     if (!vm_alloc_page_with_initializer(VM_FILE, va, writable, lazy_load_segment, aux)) {
       return NULL;

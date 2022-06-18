@@ -62,8 +62,9 @@ bool vm_alloc_page_with_initializer(enum vm_type type, void *upage, bool writabl
     /* TODO: Create the page, fetch the initializer according to the VM type,
      * TODO: and then create "uninit" page struct by calling uninit_new. You
      * TODO: should modify the field after calling the uninit_new. */
-    // 연어: 필드 바꾸라는데 뭐라는지 모르겠음
     struct page *p = (struct page *)malloc(sizeof(struct page));
+
+    // printf("va: %p | type: %d | writable: %d\n", upage, type, writable);
 
     if (type == VM_ANON)
       uninit_new(p, pg_round_down(upage), init, type, aux, anon_initializer);
@@ -126,10 +127,12 @@ vm_get_victim(void)
     if (thread_current()->stack_btm <= cur_f->page->va && cur_f->page->va <= USER_STACK) {
       cur_elem = list_next(cur_elem);
     }
-    else {
-      printf("%p VM_TYPE: %d\n", cur_f->kva, page_get_type(cur_f->page));
+    else if (page_get_type(cur_f->page) == 2) {
+      // printf("%p %p VM_TYPE: %d\n", cur_f->page->va, cur_f->kva, page_get_type(cur_f->page));
       list_remove(cur_elem);
       return cur_f;
+    } else {
+      cur_elem = list_next(cur_elem);
     }
   }
   // struct list_elem *cur_elem = list_pop_front(&frame_list);

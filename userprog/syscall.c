@@ -288,10 +288,6 @@ void check_address(void *addr) {
 #ifdef VM
   if (addr == NULL || is_kernel_vaddr(addr)) { // spt_find_page(&cur->spt, addr) == NULL
     exit(-1);
-    // printf("addr: %p\n", addr);
-    // printf("kernel? %d\n", is_kernel_vaddr(addr));
-    // if (spt_find_page(&cur->spt, addr) == NULL)
-    //   printf("page not found\n");
   }
 #else
   if (addr == NULL || is_kernel_vaddr(addr) || pml4_get_page(cur->pml4, addr) == NULL) {
@@ -307,15 +303,9 @@ void check_valid_buffer(void *buffer, unsigned size, bool to_write) {
 
   while (addr <= last_page) {
     struct page *cur = spt_find_page(&thread_current()->spt, addr);
-    // if (cur) {
-    //   if (!to_write) { //  != cur->writable
-    //     printf("to_wrtie: %d | cur->writable: %d\n", to_write, cur->writable);
-    //     puts("asdasd");
-    //     exit(-1);
-    //   }
-    // }
-    if (!cur || (to_write && !cur->writable))
+    if (!cur->writable) {
       exit(-1);
+    }
     addr += PGSIZE;
   }
 }
