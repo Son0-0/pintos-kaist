@@ -130,7 +130,10 @@ void exit(int status) {
 
 int fork (const char *thread_name) {
   check_address(thread_name);
-  return process_fork(thread_name, &thread_current()->ptf);
+  lock_acquire(&filesys_lock);
+  int ret = process_fork(thread_name, &thread_current()->ptf);
+  lock_release(&filesys_lock);
+  return ret;
 }
 
 int exec (const char *file_name) {
@@ -159,7 +162,10 @@ bool create (const char *file, unsigned initial_size) {
    * 파일 생성 성공 시 true 반환, 실패 시 false 반환
    */
   check_address(file);
-  return filesys_create(file, initial_size);
+  lock_acquire(&filesys_lock);
+  bool result = filesys_create(file, initial_size);
+  lock_release(&filesys_lock);
+  return result;
 }
 
 bool remove (const char *file) {
@@ -168,13 +174,18 @@ bool remove (const char *file) {
    * 파일 제거 성공 시 true 반환, 실패 시 false 반환
    */
   check_address(file);
-  return filesys_remove(file);
+  lock_acquire(&filesys_lock);
+  bool result = filesys_remove(file);
+  lock_release(&filesys_lock);
+  return result;
 }
 
 int open (const char *file) {
   check_address(file);
   struct thread *cur = thread_current();
+  lock_acquire(&filesys_lock);
   struct file *fd = filesys_open(file);
+  lock_release(&filesys_lock);
   if (fd) {
     for (int i = 2; i < 128; i++) {
       if (!cur->fdt[i]) {
@@ -182,22 +193,25 @@ int open (const char *file) {
         return i;
       }
     }
+    lock_acquire(&filesys_lock);
     file_close(fd);
+    lock_release(&filesys_lock);
   }
   return -1;
 }
 
 int filesize (int fd) {
   struct file *file = thread_current()->fdt[fd];
-  if (file)
-    return file_length(file);
+  if (file) {
+    lock_acquire(&filesys_lock);
+    int length = file_length(file);
+    lock_release(&filesys_lock);
+    return length;
+  }
   return -1;
 }
 
 int read (int fd, void *buffer, unsigned size) {
-  // puts("======= read ======");
-  // printf("fd: %d buffer: %p size: %p\n", fd, buffer, size);
-  // puts("======= read ======");
   check_valid_buffer(buffer, size, true);
   if (fd == 1) {
     return -1;
@@ -205,7 +219,6 @@ int read (int fd, void *buffer, unsigned size) {
 
   if (fd == 0) {
     lock_acquire(&filesys_lock);
-    // puts("here fd == 0");
     int byte = input_getc();
     lock_release(&filesys_lock);
     return byte;
@@ -244,21 +257,29 @@ int write (int fd UNUSED, const void *buffer, unsigned size) {
 
 void seek (int fd, unsigned position) {
   struct file *curfile = thread_current()->fdt[fd];
-  if (curfile)
+  if (curfile) {
+    lock_acquire(&filesys_lock);
     file_seek(curfile, position);
+    lock_release(&filesys_lock);
+  }
 }
 
 unsigned tell (int fd) {
   struct file *curfile = thread_current()->fdt[fd];
-  if (curfile)
-    return file_tell(curfile);
+  if (curfile) {
+    lock_acquire(&filesys_lock);
+    unsigned result = file_tell(curfile);
+    lock_release(&filesys_lock);
+    return result;
+  }
+  return -1;
 }
 
 void close (int fd) {
   struct file * file = thread_current()->fdt[fd];
   if (file) {
-    lock_acquire(&filesys_lock);
     thread_current()->fdt[fd] = NULL;
+    lock_acquire(&filesys_lock);
     file_close(file);
     lock_release(&filesys_lock);
   }
@@ -269,7 +290,9 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset) {
     return NULL;
   
   struct page *page = spt_find_page(&thread_current()->spt, addr);
+  lock_acquire(&filesys_lock);
   struct file *file = file_reopen(thread_current()->fdt[fd]);
+  lock_release(&filesys_lock);
 
   if (page || !file)
     return NULL;
@@ -286,11 +309,11 @@ void munmap (void *addr) {
 void check_address(void *addr) {
   struct thread *cur = thread_current();
 #ifdef VM
-  if (addr == NULL || is_kernel_vaddr(addr)) { // spt_find_page(&cur->spt, addr) == NULL
+  if (addr == NULL || is_kernel_vaddr(addr) || spt_find_page(&cur->spt, addr) == NULL) {
     exit(-1);
   }
 #else
-  if (addr == NULL || is_kernel_vaddr(addr) || pml4_get_page(cur->pml4, addr) == NULL) {
+  if (addr == NULL || is_kernel_vaddr(addr) || pml4_get_page(cur->pml4, addr) == NULL){
     exit(-1);
   }
 #endif
