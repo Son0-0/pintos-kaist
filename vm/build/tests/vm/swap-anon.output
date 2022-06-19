@@ -4,7 +4,7 @@ Kernel command line: -q -f put swap-anon run swap-anon
 Pintos booting with: 
 	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
 	ext_mem: 0x100000 ~ 0x9e0000 (Usable: 9,088 kB)
-Calibrating timer...  130,867,200 loops/s.
+Calibrating timer...  157,081,600 loops/s.
 hd0:0: detected 337 sector (168 kB) disk, model "QEMU HARDDISK", serial "QM00001"
 hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
 hd1:0: detected 104 sector (52 kB) disk, model "QEMU HARDDISK", serial "QM00003"
@@ -19,15 +19,31 @@ Executing 'swap-anon':
 (swap-anon) write sparsely over page 1024
 (swap-anon) write sparsely over page 1536
 (swap-anon) write sparsely over page 2048
-swap-anon: exit(-1)
+(swap-anon) write sparsely over page 2560
+(swap-anon) write sparsely over page 3072
+(swap-anon) write sparsely over page 3584
+(swap-anon) write sparsely over page 4096
+(swap-anon) write sparsely over page 4608
+(swap-anon) check consistency in page 0
+(swap-anon) check consistency in page 512
+(swap-anon) check consistency in page 1024
+(swap-anon) check consistency in page 1536
+(swap-anon) check consistency in page 2048
+(swap-anon) check consistency in page 2560
+(swap-anon) check consistency in page 3072
+(swap-anon) check consistency in page 3584
+(swap-anon) check consistency in page 4096
+(swap-anon) check consistency in page 4608
+(swap-anon) end
+swap-anon: exit(0)
 Execution of 'swap-anon' complete.
-Timer: 255 ticks
-Thread: 30 idle ticks, 30 kernel ticks, 195 user ticks
+Timer: 1636 ticks
+Thread: 29 idle ticks, 35 kernel ticks, 1572 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 80 reads, 236 writes
 hd1:0: 104 reads, 0 writes
-hd1:1: 56 reads, 7616 writes
-Console: 1144 characters output
+hd1:1: 41080 reads, 72384 writes
+Console: 1801 characters output
 Keyboard: 0 keys pressed
-Exception: 1 page faults
+Exception: 0 page faults
 Powering off...

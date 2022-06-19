@@ -1,124 +1,17 @@
 FAIL
-Test output failed to match any acceptable form.
-
-Acceptable output:
-  (page-merge-seq) begin
-  (page-merge-seq) init
-  (page-merge-seq) sort chunk 0
-  (page-merge-seq) child[0] exec
-  (page-merge-seq) child[0] wait success
-  (page-merge-seq) sort chunk 1
-  (page-merge-seq) child[1] exec
-  (page-merge-seq) child[1] wait success
-  (page-merge-seq) sort chunk 2
-  (page-merge-seq) child[2] exec
-  (page-merge-seq) child[2] wait success
-  (page-merge-seq) sort chunk 3
-  (page-merge-seq) child[3] exec
-  (page-merge-seq) child[3] wait success
-  (page-merge-seq) sort chunk 4
-  (page-merge-seq) child[4] exec
-  (page-merge-seq) child[4] wait success
-  (page-merge-seq) sort chunk 5
-  (page-merge-seq) child[5] exec
-  (page-merge-seq) child[5] wait success
-  (page-merge-seq) sort chunk 6
-  (page-merge-seq) child[6] exec
-  (page-merge-seq) child[6] wait success
-  (page-merge-seq) sort chunk 7
-  (page-merge-seq) child[7] exec
-  (page-merge-seq) child[7] wait success
-  (page-merge-seq) sort chunk 8
-  (page-merge-seq) child[8] exec
-  (page-merge-seq) child[8] wait success
-  (page-merge-seq) sort chunk 9
-  (page-merge-seq) child[9] exec
-  (page-merge-seq) child[9] wait success
-  (page-merge-seq) sort chunk 10
-  (page-merge-seq) child[10] exec
-  (page-merge-seq) child[10] wait success
-  (page-merge-seq) sort chunk 11
-  (page-merge-seq) child[11] exec
-  (page-merge-seq) child[11] wait success
-  (page-merge-seq) sort chunk 12
-  (page-merge-seq) child[12] exec
-  (page-merge-seq) child[12] wait success
-  (page-merge-seq) sort chunk 13
-  (page-merge-seq) child[13] exec
-  (page-merge-seq) child[13] wait success
-  (page-merge-seq) sort chunk 14
-  (page-merge-seq) child[14] exec
-  (page-merge-seq) child[14] wait success
-  (page-merge-seq) sort chunk 15
-  (page-merge-seq) child[15] exec
-  (page-merge-seq) child[15] wait success
-  (page-merge-seq) merge
-  (page-merge-seq) verify
-  (page-merge-seq) success, buf_idx=1,032,192
-  (page-merge-seq) end
-Differences in `diff -u' format:
-  (page-merge-seq) begin
-  (page-merge-seq) init
-  (page-merge-seq) sort chunk 0
-  (page-merge-seq) child[0] exec
-  (page-merge-seq) child[0] wait success
-  (page-merge-seq) sort chunk 1
-  (page-merge-seq) child[1] exec
-  (page-merge-seq) child[1] wait success
-  (page-merge-seq) sort chunk 2
-  (page-merge-seq) child[2] exec
-  (page-merge-seq) child[2] wait success
-  (page-merge-seq) sort chunk 3
-  (page-merge-seq) child[3] exec
-  (page-merge-seq) child[3] wait success
-  (page-merge-seq) sort chunk 4
-  (page-merge-seq) child[4] exec
-  (page-merge-seq) child[4] wait success
-  (page-merge-seq) sort chunk 5
-  (page-merge-seq) child[5] exec
-  (page-merge-seq) child[5] wait success
-  (page-merge-seq) sort chunk 6
-  (page-merge-seq) child[6] exec
-  (page-merge-seq) child[6] wait success
-  (page-merge-seq) sort chunk 7
-- (page-merge-seq) child[7] exec
-- (page-merge-seq) child[7] wait success
-- (page-merge-seq) sort chunk 8
-- (page-merge-seq) child[8] exec
-- (page-merge-seq) child[8] wait success
-- (page-merge-seq) sort chunk 9
-- (page-merge-seq) child[9] exec
-- (page-merge-seq) child[9] wait success
-- (page-merge-seq) sort chunk 10
-- (page-merge-seq) child[10] exec
-- (page-merge-seq) child[10] wait success
-- (page-merge-seq) sort chunk 11
-- (page-merge-seq) child[11] exec
-- (page-merge-seq) child[11] wait success
-- (page-merge-seq) sort chunk 12
-- (page-merge-seq) child[12] exec
-- (page-merge-seq) child[12] wait success
-- (page-merge-seq) sort chunk 13
-- (page-merge-seq) child[13] exec
-- (page-merge-seq) child[13] wait success
-- (page-merge-seq) sort chunk 14
-- (page-merge-seq) child[14] exec
-- (page-merge-seq) child[14] wait success
-- (page-merge-seq) sort chunk 15
-- (page-merge-seq) child[15] exec
-- (page-merge-seq) child[15] wait success
-- (page-merge-seq) merge
-- (page-merge-seq) verify
-- (page-merge-seq) success, buf_idx=1,032,192
-- (page-merge-seq) end
-+ page-merge-seq: dying due to interrupt 0x06 (#UD Invalid Opcode Exception).
-+ Interrupt 0x06 (#UD Invalid Opcode Exception) at rip=403b90
-+  cr2=0000000000000000 error=               0
-+ rax 00000000d144a94b rbx 000000000000000b rcx 0000000000403b86 rdx 0000000000000000
-+ rsp 000000004747ff10 rbp 00000000fffffffd rsi 0000000000000000 rdi 0000000000404bb0
-+ rip 0000000000403b90 r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
-+ r11 0000000000000216 r12 0000000000000000 r13 0000800420aec800 r14 00008004244f1000
-+ r15 0000010000000000 rflags 00000282
-+ es: 001b ds: 001b cs: 0023 ss: 001b
-
-(Process exit codes are excluded for matching purposes.)
+Kernel panic in run: PANIC at ../../threads/palloc.c:321 in palloc_free_multiple(): assertion `bitmap_all (pool->used_map, page_idx, page_cnt)' failed.
+Call stack: 0x80042186e8 0x800420bfab 0x800420bff8 0x800420d327 0x800420d3aa 0x800420d42d 0x800420d4f6 0x800421c37e 0x800421c2d1 0x8004207450 0x800421d328 0x8004209684 0x8004209aa2
+Translation of call stack:
+0x00000080042186e8: debug_panic (lib/kernel/debug.c:32)
+0x000000800420bfab: palloc_free_multiple (threads/palloc.c:322)
+0x000000800420bff8: palloc_free_page (threads/palloc.c:329)
+0x000000800420d327: pt_destroy (threads/mmu.c:160 (discriminator 2))
+0x000000800420d3aa: pgdir_destroy (threads/mmu.c:170 (discriminator 2))
+0x000000800420d42d: pdpe_destroy (threads/mmu.c:180 (discriminator 2))
+0x000000800420d4f6: pml4_destroy (threads/mmu.c:199)
+0x000000800421c37e: process_cleanup (userprog/process.c:307)
+0x000000800421c2d1: process_exit (userprog/process.c:279)
+0x0000008004207450: thread_exit (threads/thread.c:350)
+0x000000800421d328: kill (userprog/exception.c:96)
+0x0000008004209684: intr_handler (threads/interrupt.c:352)
+0x0000008004209aa2: intr_entry (threads/intr-stubs.o:?)

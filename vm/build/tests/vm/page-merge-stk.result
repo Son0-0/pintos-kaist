@@ -1,2 +1,2 @@
 FAIL
-Run didn't start up properly: no "Boot complete" message
+run: wait for child 0: FAILED

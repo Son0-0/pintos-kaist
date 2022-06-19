@@ -91,7 +91,7 @@ spt_find_page(struct supplemental_page_table *spt UNUSED, void *va UNUSED)
   struct hash_elem *e;
 
   p.va = pg_round_down(va);
-  e = hash_find(&(spt->pages), &p.hash_elem);
+  e = hash_find(&spt->pages, &p.hash_elem);
 
   return e != NULL ? hash_entry(e, struct page, hash_elem) : NULL;
 }
@@ -110,7 +110,8 @@ bool spt_insert_page(struct supplemental_page_table *spt UNUSED, struct page *pa
 
 void spt_remove_page(struct supplemental_page_table *spt, struct page *page)
 {
-  vm_dealloc_page(page);
+  hash_delete(&spt->pages, &page->hash_elem);
+  free(page);
   return true;
 }
 
@@ -124,9 +125,11 @@ vm_get_victim(void)
   while (true) {
     struct list_elem *cur_elem = list_pop_front(&frame_list);
     struct frame *cur_f = list_entry(cur_elem, struct frame, frame_elem);
-    if (!pml4_is_accessed(thread_current()->pml4, cur_f->page->va)) {
+    if (!pml4_is_accessed(thread_current()->pml4, cur_f->page->va) || !pml4_is_accessed(thread_current()->pml4, cur_f->kva)) {
+      // printf("victim va: %p | kva: %p | type: %d\n", cur_f->page->va, cur_f->kva, page_get_type(cur_f->page));
       return cur_f;
     } else {
+      // pml4_set_accessed(thread_current()->pml4, cur_f->kva, false);
       pml4_set_accessed(thread_current()->pml4, cur_f->page->va, false);
       list_push_back(&frame_list, cur_elem);
     }
@@ -244,7 +247,8 @@ vm_do_claim_page(struct page *page)
   page->frame = frame;
   
   /* TODO: Insert page table entry to map page's VA to frame's PA. */
-  pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable); // * ref: 혜진
+  if (!pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable)) // * ref: 혜진
+    return false;
   return swap_in(page, frame->kva);
 }
 

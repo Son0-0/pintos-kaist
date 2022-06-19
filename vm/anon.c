@@ -11,6 +11,9 @@
 //흥민이형 받아!!!
 static struct disk *swap_disk;
 static struct bitmap *swap_slot;
+
+struct lock bitmap_lock;
+
 static bool anon_swap_in (struct page *page, void *kva);
 static bool anon_swap_out (struct page *page);
 static void anon_destroy (struct page *page);
@@ -28,9 +31,9 @@ void
 vm_anon_init (void) {
 	/* TODO: Set up the swap_disk. */
 	//흥민이형 받아!!!
+  lock_init(&bitmap_lock);
 	swap_disk = disk_get(1,1);
-  uint64_t d_size = disk_size(swap_disk);
-  swap_slot = bitmap_create(d_size / 8);
+  swap_slot = bitmap_create(disk_size(swap_disk) / 8);
 }
 
 /* Initialize the file mapping */
@@ -46,18 +49,14 @@ anon_initializer (struct page *page, enum vm_type type, void *kva) {
 static bool
 anon_swap_in (struct page *page, void *kva) {
 	struct anon_page *anon_page = &page->anon;
-  
-  for (int i = 0; i < 8; i++) {
-    disk_read(swap_disk, page->slot_idx + i, kva + (i * DISK_SECTOR_SIZE));
-  }
-
-  // for (int i = 0; i < PGSIZE; i++) {
-  //   disk_read(swap_disk, page->slot_idx + (i / 512), kva + i);
-  // }
 
   for (int i = 0; i < 8; i++) {
-    bitmap_reset(swap_slot, page->slot_idx + i);
+    disk_read(swap_disk, (page->slot_idx * 8) + i, kva + (i * DISK_SECTOR_SIZE));
   }
+
+  lock_acquire(&bitmap_lock);
+  bitmap_set(swap_slot, page->slot_idx, false);
+  lock_release(&bitmap_lock);
   page->slot_idx = NULL;
 	return true;
 }
@@ -67,18 +66,16 @@ static bool
 anon_swap_out (struct page *page) {
   struct anon_page *anon_page = &page->anon;
 	
-  uint32_t empty_slot = bitmap_scan(swap_slot, 0, 8, false);
-	
+  lock_acquire(&bitmap_lock);
+  uint64_t empty_slot = bitmap_scan_and_flip(swap_slot, 0, 1, false);
+	lock_release(&bitmap_lock);
+  
   if (empty_slot == BITMAP_ERROR) {
 		return false;
 	}
 
   for (int i = 0; i < 8; i++) {
-    disk_write(swap_disk, empty_slot + i, page->frame->kva + (i * DISK_SECTOR_SIZE));
-  }
-
-  for (int i = 0; i < 8; i++) {
-    bitmap_mark(swap_slot, empty_slot + i);
+    disk_write(swap_disk, (empty_slot * 8) + i, page->frame->kva + (i * DISK_SECTOR_SIZE));
   }
 
 	page->slot_idx = empty_slot;
@@ -90,5 +87,4 @@ anon_swap_out (struct page *page) {
 static void
 anon_destroy (struct page *page) {
 	struct anon_page *anon_page = &page->anon;
-  pml4_clear_page(thread_current()->pml4, page->va);
 }

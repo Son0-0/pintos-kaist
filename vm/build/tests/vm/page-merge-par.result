@@ -1,2 +1,17 @@
 FAIL
-Run didn't shut down properly: no "Timer: # ticks" message
+Kernel panic in run: PANIC at ../../threads/palloc.c:321 in palloc_free_multiple(): assertion `bitmap_all (pool->used_map, page_idx, page_cnt)' failed.
+Call stack: 0x80042186e8 0x800420bfab 0x800420bff8 0x800420d327 0x800420d3aa 0x800420d42d 0x800420d4f6 0x800421c37e 0x800421c2d1 0x8004207450 0x800421d954 0x800421d645 0x800421d50fc
+Translation of call stack:
+0x00000080042186e8: debug_panic (lib/kernel/debug.c:32)
+0x000000800420bfab: palloc_free_multiple (threads/palloc.c:322)
+0x000000800420bff8: palloc_free_page (threads/palloc.c:329)
+0x000000800420d327: pt_destroy (threads/mmu.c:160 (discriminator 2))
+0x000000800420d3aa: pgdir_destroy (threads/mmu.c:170 (discriminator 2))
+0x000000800420d42d: pdpe_destroy (threads/mmu.c:180 (discriminator 2))
+0x000000800420d4f6: pml4_destroy (threads/mmu.c:199)
+0x000000800421c37e: process_cleanup (userprog/process.c:307)
+0x000000800421c2d1: process_exit (userprog/process.c:279)
+0x0000008004207450: thread_exit (threads/thread.c:350)
+0x000000800421d954: fork (userprog/syscall.c:131)
+0x000000800421d645: syscall_handler (userprog/syscall.c:64)
+0x00000800421d50fc: (unknown)

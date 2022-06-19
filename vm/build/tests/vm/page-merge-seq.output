@@ -45,24 +45,28 @@ child-sort: exit(123)
 child-sort: exit(123)
 (page-merge-seq) child[6] wait success
 (page-merge-seq) sort chunk 7
+(page-merge-seq) child[7] exec
+child-sort: exit(123)
+(page-merge-seq) child[7] wait success
+(page-merge-seq) sort chunk 8
 child-sort: exit(-1)
 page-merge-seq: dying due to interrupt 0x06 (#UD Invalid Opcode Exception).
-Interrupt 0x06 (#UD Invalid Opcode Exception) at rip=403b90
- cr2=0000000000000000 error=               0
-rax 00000000d144a94b rbx 000000000000000b rcx 0000000000403b86 rdx 0000000000000000
-rsp 000000004747ff10 rbp 00000000fffffffd rsi 0000000000000000 rdi 0000000000404bb0
-rip 0000000000403b90 r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
+Interrupt 0x06 (#UD Invalid Opcode Exception) at rip=403b86
+ cr2=00000000bdbdbcbc error=               0
+rax 000000000000000c rbx 000080042420f800 rcx 0000000000403b86 rdx 0000000000000000
+rsp 000000004747ff18 rbp 000000004747ff60 rsi 0000000000000000 rdi 0000000000404bb0
+rip 0000000000403b86 r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
 r11 0000000000000216 r12 0000000000000000 r13 0000800420aec800 r14 00008004244f1000
-r15 0000010000000000 rflags 00000282
+r15 0000010000000000 rflags 00000216
 es: 001b ds: 001b cs: 0023 ss: 001b
-Execution of 'page-merge-seq' complete.
-Timer: 221 ticks
-Thread: 30 idle ticks, 32 kernel ticks, 159 user ticks
+Kernel PANIC at ../../threads/palloc.c:321 in palloc_free_multiple(): assertion `bitmap_all (pool->used_map, page_idx, page_cnt)' failed.
+Call stack: 0x80042186e8 0x800420bfab 0x800420bff8 0x800420d327 0x800420d3aa 0x800420d42d 0x800420d4f6 0x800421c37e 0x800421c2d1 0x8004207450 0x800421d328 0x8004209684 0x8004209aa2page-merge-seq: exit(-1)
+Kernel PANIC recursion at ../../filesys/inode.c:304 in inode_allow_write().
+Timer: 237 ticks
+Thread: 30 idle ticks, 36 kernel ticks, 171 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 2225 reads, 2498 writes
+hd0:1: 2523 reads, 2750 writes
 hd1:0: 216 reads, 0 writes
-hd1:1: 0 reads, 88 writes
-Console: 2526 characters output
-Keyboard: 0 keys pressed
-Exception: 1 page faults
-Powering off...
+hd1:1: 0 reads, 800 writes
+Console: 3028 characters output
+Key
