@@ -8,4 +8,5 @@ vm/anon.o: ../../vm/anon.c ../../include/vm/vm.h \
  ../../include/lib/debug.h ../../include/lib/kernel/list.h \
  ../../include/lib/limits.h ../../include/threads/interrupt.h \
  ../../include/threads/synch.h ../../include/devices/disk.h \
- ../../include/lib/inttypes.h ../../include/lib/kernel/bitmap.h
+ ../../include/lib/inttypes.h ../../include/lib/kernel/bitmap.h \
+ ../../include/threads/vaddr.h ../../include/threads/loader.h

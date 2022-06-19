@@ -36,6 +36,7 @@ file_backed_initializer (struct page *page, enum vm_type type, void *kva) {
 /* Swap in the page by read contents from the file. */
 static bool
 file_backed_swap_in (struct page *page, void *kva) {
+  puts("||||||||||||||| file-backed swap_in ||||||||||||||");
 	struct file_page *file_page UNUSED = &page->file;
   if (file_read_at(page->mfile, kva, page->read_bytes, page->file_ofs) != (int) page->read_bytes) {
     palloc_free_page(kva);
@@ -63,6 +64,7 @@ file_backed_swap_out (struct page *page) {
 static void
 file_backed_destroy (struct page *page) {
 	struct file_page *file_page UNUSED = &page->file;
+  pml4_clear_page(thread_current()->pml4, page->va);
 }
 
 /* Do the mmap */
@@ -122,11 +124,11 @@ do_munmap (void *addr) {
     ofs += write_bytes;
     size -= write_bytes;
     addr += PGSIZE;
-    pml4_clear_page(thread_current()->pml4, cur_page->va);
     destroy(cur_page);
+    // pml4_clear_page(thread_current()->pml4, cur_page->va);
   }
-  pml4_clear_page(thread_current()->pml4, page->va);
   destroy(page);
+  // pml4_clear_page(thread_current()->pml4, page->va);
 }
 
 static bool
@@ -137,7 +139,6 @@ lazy_load_segment (struct page *page, struct dummy *aux) {
 	/* TODO: VA is available when calling this function. */
 	if (file_read_at(aux->file, page->frame->kva, aux->read_bytes, aux->ofs) != (int) aux->read_bytes) {
     palloc_free_page (page->frame->kva);
-    // spt_remove_page(page);
     free(aux);
 		return false;
 	}

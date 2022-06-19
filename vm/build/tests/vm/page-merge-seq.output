@@ -4,7 +4,7 @@ Kernel command line: -q -f put page-merge-seq put child-sort run page-merge-seq
 Pintos booting with: 
 	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
 	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
-Calibrating timer...  37,427,200 loops/s.
+Calibrating timer...  157,081,600 loops/s.
 hd0:0: detected 337 sector (168 kB) disk, model "QEMU HARDDISK", serial "QM00001"
 hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
 hd1:0: detected 216 sector (108 kB) disk, model "QEMU HARDDISK", serial "QM00003"
@@ -45,54 +45,24 @@ child-sort: exit(123)
 child-sort: exit(123)
 (page-merge-seq) child[6] wait success
 (page-merge-seq) sort chunk 7
-(page-merge-seq) child[7] exec
-child-sort: exit(123)
-(page-merge-seq) child[7] wait success
-(page-merge-seq) sort chunk 8
-(page-merge-seq) child[8] exec
-child-sort: exit(123)
-(page-merge-seq) child[8] wait success
-(page-merge-seq) sort chunk 9
-(page-merge-seq) child[9] exec
-child-sort: exit(123)
-(page-merge-seq) child[9] wait success
-(page-merge-seq) sort chunk 10
-(page-merge-seq) child[10] exec
-child-sort: exit(123)
-(page-merge-seq) child[10] wait success
-(page-merge-seq) sort chunk 11
-(page-merge-seq) child[11] exec
-child-sort: exit(123)
-(page-merge-seq) child[11] wait success
-(page-merge-seq) sort chunk 12
-(page-merge-seq) child[12] exec
-child-sort: exit(123)
-(page-merge-seq) child[12] wait success
-(page-merge-seq) sort chunk 13
-(page-merge-seq) child[13] exec
-child-sort: exit(123)
-(page-merge-seq) child[13] wait success
-(page-merge-seq) sort chunk 14
-(page-merge-seq) child[14] exec
-child-sort: exit(123)
-(page-merge-seq) child[14] wait success
-(page-merge-seq) sort chunk 15
-(page-merge-seq) child[15] exec
-child-sort: exit(123)
-(page-merge-seq) child[15] wait success
-(page-merge-seq) merge
-(page-merge-seq) verify
-(page-merge-seq) success, buf_idx=1,032,192
-(page-merge-seq) end
-page-merge-seq: exit(0)
+child-sort: exit(-1)
+page-merge-seq: dying due to interrupt 0x06 (#UD Invalid Opcode Exception).
+Interrupt 0x06 (#UD Invalid Opcode Exception) at rip=403b90
+ cr2=0000000000000000 error=               0
+rax 00000000d144a94b rbx 000000000000000b rcx 0000000000403b86 rdx 0000000000000000
+rsp 000000004747ff10 rbp 00000000fffffffd rsi 0000000000000000 rdi 0000000000404bb0
+rip 0000000000403b90 r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
+r11 0000000000000216 r12 0000000000000000 r13 0000800420aec800 r14 00008004244f1000
+r15 0000010000000000 rflags 00000282
+es: 001b ds: 001b cs: 0023 ss: 001b
 Execution of 'page-merge-seq' complete.
-Timer: 622 ticks
-Thread: 30 idle ticks, 89 kernel ticks, 503 user ticks
+Timer: 221 ticks
+Thread: 30 idle ticks, 32 kernel ticks, 159 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 4902 reads, 4640 writes
+hd0:1: 2225 reads, 2498 writes
 hd1:0: 216 reads, 0 writes
-hd1:1: 0 reads, 0 writes
-Console: 3136 characters output
+hd1:1: 0 reads, 88 writes
+Console: 2526 characters output
 Keyboard: 0 keys pressed
-Exception: 0 page faults
+Exception: 1 page faults
 Powering off...

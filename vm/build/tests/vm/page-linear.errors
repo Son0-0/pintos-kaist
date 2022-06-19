@@ -1,1 +1,10 @@
-qemu-system-x86_64: warning: TCG doesn't support requested feature: CPUID.01H:ECX.vmx [bit 5]
+Traceback (most recent call last):
+  File "/home/ubuntu/pintos-kaist/utils/pintos", line 177, in <module>
+    import argparse
+  File "/usr/lib/python3.6/argparse.py", line 94, in <module>
+    from gettext import gettext as _, ngettext
+  File "/usr/lib/python3.6/gettext.py", line 49, in <module>
+    import locale, copy, io, os, re, struct, sys
+  File "/usr/lib/python3.6/locale.py", line 1430, in <module>
+    'zu_za':                                'zu_ZA.ISO8859-1',
+KeyboardInterrupt

@@ -145,7 +145,7 @@ __do_fork (void *aux) {
 	/* 1. Read the cpu context to local stack. */
 	memcpy (&if_, parent_if, sizeof (struct intr_frame));
   if_.R.rax = 0;
-  current->tf = if_;
+  // current->tf = if_;
 
 	/* 2. Duplicate PT */
 	current->pml4 = pml4_create();
@@ -272,10 +272,12 @@ process_exit (void) {
     }
     cnt++;
   }
+
+  palloc_free_page(table);
+  process_cleanup ();
+  
   sema_up(&curr->load_sema);
   sema_down(&curr->exit_sema);
-  palloc_free_page(table);
-	process_cleanup ();
 }
 
 /* Free the current process's resources. */

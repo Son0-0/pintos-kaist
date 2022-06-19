@@ -130,9 +130,7 @@ void exit(int status) {
 
 int fork (const char *thread_name) {
   check_address(thread_name);
-  lock_acquire(&filesys_lock);
   int ret = process_fork(thread_name, &thread_current()->ptf);
-  lock_release(&filesys_lock);
   return ret;
 }
 
@@ -300,9 +298,7 @@ void *mmap (void *addr, size_t length, int writable, int fd, off_t offset) {
 }
 
 void munmap (void *addr) {
-  if (addr == NULL || is_kernel_vaddr(addr) || spt_find_page(&thread_current()->spt, addr) == NULL) {
-    exit(-1);
-  }
+  check_address(addr);
   do_munmap(addr);
 }
 

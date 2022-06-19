@@ -1,9 +1,6 @@
 qemu-system-x86_64: warning: TCG doesn't support requested feature: CPUID.01H:ECX.vmx [bit 5]
+qemu-system-x86_64: terminating on signal 2
 Traceback (most recent call last):
-  File "/home/ubuntu/pintos-kaist/utils/pintos", line 225, in <module>
-    guestfns=[f[0].split(':') for f in args.GUESTFNS]).run()
-  File "/home/ubuntu/pintos-kaist/utils/pintos", line 166, in run
-    subprocess.run(cmd, **args)
   File "/usr/lib/python3.6/subprocess.py", line 425, in run
     stdout, stderr = process.communicate(input, timeout=timeout)
   File "/usr/lib/python3.6/subprocess.py", line 863, in communicate
@@ -12,4 +9,19 @@ Traceback (most recent call last):
     self.wait(timeout=self._remaining_time(endtime))
   File "/usr/lib/python3.6/subprocess.py", line 1471, in wait
     time.sleep(delay)
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/pintos-kaist/utils/pintos", line 225, in <module>
+    guestfns=[f[0].split(':') for f in args.GUESTFNS]).run()
+  File "/home/ubuntu/pintos-kaist/utils/pintos", line 166, in run
+    subprocess.run(cmd, **args)
+  File "/usr/lib/python3.6/subprocess.py", line 433, in run
+    process.wait()
+  File "/usr/lib/python3.6/subprocess.py", line 1477, in wait
+    (pid, sts) = self._try_wait(0)
+  File "/usr/lib/python3.6/subprocess.py", line 1424, in _try_wait
+    (pid, sts) = os.waitpid(self.pid, wait_flags)
 KeyboardInterrupt

@@ -1,0 +1,20 @@
+Failed to import the site module
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site.py", line 570, in <module>
+    main()
+  File "/usr/lib/python3.6/site.py", line 557, in main
+    known_paths = addsitepackages(known_paths)
+  File "/usr/lib/python3.6/site.py", line 345, in addsitepackages
+    addsitedir(sitedir, known_paths)
+  File "/usr/lib/python3.6/site.py", line 213, in addsitedir
+    addpackage(sitedir, name, known_paths)
+  File "/usr/lib/python3.6/site.py", line 174, in addpackage
+    exec(line)
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.6/types.py", line 171, in <module>
+    import functools as _functools
+  File "/usr/lib/python3.6/functools.py", line 21, in <module>
+    from collections import namedtuple
+  File "/usr/lib/python3.6/collections/__init__.py", line 31, in <module>
+    from itertools import repeat as _repeat, chain as _chain, starmap as _starmap
+KeyboardInterrupt
