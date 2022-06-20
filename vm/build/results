@@ -38,7 +38,7 @@ pass tests/userprog/fork-once
 pass tests/userprog/fork-multiple
 pass tests/userprog/fork-recursive
 pass tests/userprog/fork-read
-FAIL tests/userprog/fork-close
+pass tests/userprog/fork-close
 pass tests/userprog/fork-boundary
 pass tests/userprog/exec-once
 pass tests/userprog/exec-arg
@@ -72,9 +72,9 @@ pass tests/vm/pt-grow-stk-sc
 pass tests/vm/page-linear
 pass tests/vm/page-parallel
 pass tests/vm/page-merge-seq
-FAIL tests/vm/page-merge-par
-FAIL tests/vm/page-merge-stk
-pass tests/vm/page-merge-mm
+pass tests/vm/page-merge-par
+pass tests/vm/page-merge-stk
+FAIL tests/vm/page-merge-mm
 pass tests/vm/page-shuffle
 pass tests/vm/mmap-read
 pass tests/vm/mmap-close
@@ -83,7 +83,7 @@ pass tests/vm/mmap-overlap
 pass tests/vm/mmap-twice
 pass tests/vm/mmap-write
 pass tests/vm/mmap-ro
-FAIL tests/vm/mmap-exit
+pass tests/vm/mmap-exit
 pass tests/vm/mmap-shuffle
 pass tests/vm/mmap-bad-fd
 pass tests/vm/mmap-clean

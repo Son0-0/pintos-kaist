@@ -145,7 +145,7 @@ __do_fork (void *aux) {
 	/* 1. Read the cpu context to local stack. */
 	memcpy (&if_, parent_if, sizeof (struct intr_frame));
   if_.R.rax = 0;
-  // current->tf = if_;
+  current->tf = if_;
 
 	/* 2. Duplicate PT */
 	current->pml4 = pml4_create();
@@ -259,11 +259,6 @@ process_exit (void) {
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
 
-  hash_apply(&curr->spt.pages, &munmap_page);
-  
-  if (curr->run_file)
-    file_close(curr->run_file);
-
   int cnt = 2;
   while (cnt < 128) {
     if (table[cnt]) {
@@ -272,12 +267,14 @@ process_exit (void) {
     }
     cnt++;
   }
-
+  file_close(curr->run_file);
   palloc_free_page(table);
-  process_cleanup ();
+  hash_apply(&curr->spt.pages, &munmap_page);
   
   sema_up(&curr->load_sema);
   sema_down(&curr->exit_sema);
+  
+  process_cleanup ();
 }
 
 /* Free the current process's resources. */
@@ -538,19 +535,16 @@ void argument_stack(char **parse, int count, void **esp) {
 
   *esp -= 8;
   memset(*esp, 0, sizeof(char *));
-  // **(char **)esp = 0;
 
   // * argv[i] 주소
 	for (int i = count - 1; -1 < i; i--) {
 		*esp = *esp - 8;
     memcpy(*esp, &argv_address[i], sizeof(char *));
-		// memcpy(*esp, &argv_address[i], strlen(&argv_address[i]));
 	}
 
 	// * return address(fake)
 	*esp -= 8;
   memset(*esp, 0, sizeof(char *));
-	// **(char **)esp = 0;
 
 }
 

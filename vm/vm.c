@@ -200,17 +200,19 @@ bool vm_try_handle_fault(struct intr_frame *f UNUSED, void *addr UNUSED,
     return vm_do_claim_page(page);
   }
 
-  if ((f->rsp - 8 == addr) || (f->rsp - 12 == addr)) { //  || (f->rsp - 12 == addr) case가 들어옴
-    uint64_t size = thread_current()->stack_btm;
-    while (addr < size) {
-      size -= PGSIZE;
-      vm_stack_growth(size);
-      if (spt_find_page(spt, size)) {
-        if(!vm_claim_page(size))
-          return false;
+  if (USER_STACK - (1 << 20) < addr && addr <= USER_STACK) {
+    if ((f->rsp - 8 <= addr)) { //  || (f->rsp - 12 == addr) case가 들어옴
+      uint64_t size = thread_current()->stack_btm;
+      while (addr < size) {
+        size -= PGSIZE;
+        vm_stack_growth(size);
+        if (spt_find_page(spt, size)) {
+          if(!vm_claim_page(size))
+            return false;
+        }
       }
+      return true;
     }
-    return true;
   }
   if (write && !page->writable)
     return false;
@@ -246,7 +248,6 @@ vm_do_claim_page(struct page *page)
   page->frame = frame;
   
   /* TODO: Insert page table entry to map page's VA to frame's PA. */
-  // pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable);
   if (!pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable)) // * ref: 혜진
     return false;
   return swap_in(page, frame->kva);
@@ -324,40 +325,12 @@ bool copy_page(const struct hash_elem *a_, void *aux UNUSED)
       goto err;
     if(!vm_do_claim_page(newpage))
       goto err;
-    if(page->frame == NULL && !vm_do_claim_page(page))
-      goto err;
-    memcpy(newpage->frame->kva, page->frame->kva, PGSIZE);
+    if(page->frame != NULL)
+      memcpy(newpage->frame->kva, page->frame->kva, PGSIZE);
   }
   return true;
 err:
   return false;
-  // bool success = vm_alloc_page_with_initializer(page_get_type(page), page->va, page->writable, NULL, NULL);
-
-
-  // // * 부모 page의 정보를 활용하여 initializer 호출
-  // if (success) {
-  //   struct page *newpage = spt_find_page(&thread_current()->spt, page->va);
-
-  //   newpage->mfile = page->mfile;
-  //   newpage->file_size = page->file_size;
-  //   newpage->file_ofs = page->file_ofs;
-  //   newpage->read_bytes = page->read_bytes;
-  //   newpage->slot_idx = page->slot_idx;
-
-  //   spt_insert_page(aux, newpage);
-
-  //   // * 자식 테이블에 방금 생성된 페이지를 찾아서 frame 할당과 부모 frame memcopy
-  //   if (page->frame) {
-  //     newpage->frame = vm_get_frame();
-  //     memcpy(newpage->frame->kva, page->frame->kva, PGSIZE);
-  //     newpage->frame->page = newpage;
-  //     success = pml4_set_page(thread_current()->pml4, newpage->va, newpage->frame->kva, newpage->writable);
-  //     if (!success)
-  //       return success;
-  //   }
-  // }
-
-  // return success;
 }
 
 bool munmap_page(const struct hash_elem *a, void *aux UNUSED) {

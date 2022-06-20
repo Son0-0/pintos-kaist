@@ -12,7 +12,7 @@
 static struct disk *swap_disk;
 static struct bitmap *swap_slot;
 
-struct lock bitmap_lock;
+struct lock swap_lock;
 
 static bool anon_swap_in (struct page *page, void *kva);
 static bool anon_swap_out (struct page *page);
@@ -31,7 +31,7 @@ void
 vm_anon_init (void) {
 	/* TODO: Set up the swap_disk. */
 	//흥민이형 받아!!!
-  lock_init(&bitmap_lock);
+  lock_init(&swap_lock);
 	swap_disk = disk_get(1,1);
   swap_slot = bitmap_create(disk_size(swap_disk) / 8);
 }
@@ -42,6 +42,7 @@ anon_initializer (struct page *page, enum vm_type type, void *kva) {
 	/* Set up the handler */
 	page->operations = &anon_ops;
 	struct anon_page *anon_page = &page->anon;
+  return true;
 }
 
 /* Swap in the page by read contents from the swap disk. */
@@ -51,12 +52,14 @@ anon_swap_in (struct page *page, void *kva) {
 	struct anon_page *anon_page = &page->anon;
 
   for (int i = 0; i < 8; i++) {
+    lock_acquire(&swap_lock);
     disk_read(swap_disk, (page->slot_idx * 8) + i, kva + (i * DISK_SECTOR_SIZE));
+    lock_release(&swap_lock);
   }
 
-  lock_acquire(&bitmap_lock);
+  lock_acquire(&swap_lock);
   bitmap_set(swap_slot, page->slot_idx, false);
-  lock_release(&bitmap_lock);
+  lock_release(&swap_lock);
   page->slot_idx = NULL;
 	return true;
 }
@@ -66,16 +69,18 @@ static bool
 anon_swap_out (struct page *page) {
   struct anon_page *anon_page = &page->anon;
 	
-  lock_acquire(&bitmap_lock);
+  lock_acquire(&swap_lock);
   uint64_t empty_slot = bitmap_scan_and_flip(swap_slot, 0, 1, false);
-	lock_release(&bitmap_lock);
-  
+  lock_release(&swap_lock);
+
   if (empty_slot == BITMAP_ERROR) {
 		return false;
 	}
 
   for (int i = 0; i < 8; i++) {
+    lock_acquire(&swap_lock);
     disk_write(swap_disk, (empty_slot * 8) + i, page->frame->kva + (i * DISK_SECTOR_SIZE));
+    lock_release(&swap_lock);
   }
 
 	page->slot_idx = empty_slot;
