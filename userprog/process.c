@@ -703,11 +703,12 @@ lazy_load_segment (struct page *page, struct dummy *aux) {
 	/* TODO: This called when the first page fault occurs on address VA. */
 	/* TODO: VA is available when calling this function. */
   // printf("page va: %u aux readbyte: %d aux zerobyte: %d\n", page->va, aux->read_bytes, aux->zero_bytes);
-	if (file_read_at(aux->file, page->frame->kva, aux->read_bytes, aux->ofs) != (int) aux->read_bytes) {
-    palloc_free_page (page->frame->kva);
-    free(aux);
-		return false;
-	}
+	// if (file_read_at(aux->file, page->frame->kva, aux->read_bytes, aux->ofs) != (int) aux->read_bytes) {
+  //   palloc_free_page (page->frame->kva);
+  //   free(aux);
+	// 	return false;
+	// }
+  file_read_at(aux->file, page->frame->kva, aux->read_bytes, aux->ofs);
 	memset (page->frame->kva + aux->read_bytes, 0, aux->zero_bytes);
   free(aux);
   return true;

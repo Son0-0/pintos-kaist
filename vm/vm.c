@@ -65,8 +65,6 @@ bool vm_alloc_page_with_initializer(enum vm_type type, void *upage, bool writabl
      * TODO: should modify the field after calling the uninit_new. */
     struct page *p = (struct page *)malloc(sizeof(struct page));
 
-    // printf("va: %p | type: %d | writable: %d\n", upage, type, writable);
-
     if (type == VM_ANON)
       uninit_new(p, pg_round_down(upage), init, type, aux, anon_initializer);
     else if (type == VM_FILE)
@@ -162,6 +160,7 @@ vm_get_frame(void)
   /* TODO: Fill this function. */
   frame->kva = palloc_get_page(PAL_USER);
   if (frame->kva == NULL) {
+    free(frame);
     frame = vm_evict_frame();
   }
   frame->page = NULL;
