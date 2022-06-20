@@ -7,6 +7,7 @@
 // * Project 3 추가
 #include "threads/mmu.h"
 #include "userprog/syscall.h"
+#include "userprog/process.h"
 
 /* Initializes the virtual memory subsystem by invoking each subsystem's
  * intialize codes. */
@@ -125,11 +126,9 @@ vm_get_victim(void)
   while (true) {
     struct list_elem *cur_elem = list_pop_front(&frame_list);
     struct frame *cur_f = list_entry(cur_elem, struct frame, frame_elem);
-    if (!pml4_is_accessed(thread_current()->pml4, cur_f->page->va) || !pml4_is_accessed(thread_current()->pml4, cur_f->kva)) {
-      // printf("victim va: %p | kva: %p | type: %d\n", cur_f->page->va, cur_f->kva, page_get_type(cur_f->page));
+    if (cur_f && !pml4_is_accessed(thread_current()->pml4, cur_f->page->va)) {
       return cur_f;
     } else {
-      // pml4_set_accessed(thread_current()->pml4, cur_f->kva, false);
       pml4_set_accessed(thread_current()->pml4, cur_f->page->va, false);
       list_push_back(&frame_list, cur_elem);
     }
@@ -162,12 +161,10 @@ vm_get_frame(void)
   struct frame *frame = (struct frame *)malloc(sizeof(struct frame));
   /* TODO: Fill this function. */
   frame->kva = palloc_get_page(PAL_USER);
-  frame->page = NULL;
-
   if (frame->kva == NULL) {
     frame = vm_evict_frame();
-    frame->page = NULL;
   }
+  frame->page = NULL;
   ASSERT(frame != NULL);
   ASSERT(frame->page == NULL);
   list_push_back(&frame_list, &frame->frame_elem);
@@ -202,8 +199,8 @@ bool vm_try_handle_fault(struct intr_frame *f UNUSED, void *addr UNUSED,
   if (page && not_present) {
     return vm_do_claim_page(page);
   }
-  // * 연어
-  if (f->rsp - 8 == addr) { //  || (f->rsp - 12 == addr) case가 들어옴
+
+  if ((f->rsp - 8 == addr) || (f->rsp - 12 == addr)) { //  || (f->rsp - 12 == addr) case가 들어옴
     uint64_t size = thread_current()->stack_btm;
     while (addr < size) {
       size -= PGSIZE;
@@ -215,6 +212,8 @@ bool vm_try_handle_fault(struct intr_frame *f UNUSED, void *addr UNUSED,
     }
     return true;
   }
+  if (write && !page->writable)
+    return false;
   return false;
 }
 
@@ -247,6 +246,7 @@ vm_do_claim_page(struct page *page)
   page->frame = frame;
   
   /* TODO: Insert page table entry to map page's VA to frame's PA. */
+  // pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable);
   if (!pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable)) // * ref: 혜진
     return false;
   return swap_in(page, frame->kva);
@@ -262,7 +262,7 @@ void supplemental_page_table_init(struct supplemental_page_table *spt UNUSED)
 bool supplemental_page_table_copy(struct supplemental_page_table *dst UNUSED,
                                   struct supplemental_page_table *src UNUSED)
 {
-  
+  src->pages.aux = dst;
   return hash_apply(&src->pages, &copy_page);
 }
 
@@ -302,23 +302,62 @@ bool copy_page(const struct hash_elem *a_, void *aux UNUSED)
 {
   // * hash_elem으로 부모 page를 찾고
   struct page *page = hash_entry(a_, struct page, hash_elem);
-  bool success = vm_alloc_page_with_initializer(page_get_type(page), page->va, page->writable, NULL, NULL);
-  
-  // * 부모 page의 정보를 활용하여 initializer 호출
-  if (success) {
-    // * 자식 테이블에 방금 생성된 페이지를 찾아서 frame 할당과 부모 frame memcopy
-    if (page->frame) {
-      struct page *newpage = spt_find_page(&thread_current()->spt, page->va);
-      newpage->frame = vm_get_frame();
-      memcpy(newpage->frame->kva, page->frame->kva, PGSIZE);
-      newpage->frame->page = newpage;
-      success = pml4_set_page(thread_current()->pml4, newpage->va, newpage->frame->kva, newpage->writable);
-      if (!success)
-        return success;
-    }
-  }
 
-  return success;
+  void *upage = page->va;
+  enum vm_type type = page_get_type(page);
+  bool writable = page->writable;
+
+  if (spt_find_page(aux, upage) == NULL) {
+    struct page *newpage = (struct page*)malloc(sizeof(struct page));
+    switch(VM_TYPE(type)) {
+      case VM_ANON:
+        uninit_new(newpage, pg_round_down(upage), NULL, type, NULL, anon_initializer);
+        break;
+      case VM_FILE:
+        uninit_new(newpage, pg_round_down(upage), NULL, type, NULL, file_backed_initializer);
+        break;
+      default:
+        PANIC("WRONG TYPE");
+    }
+    newpage->writable = writable;
+    if(!spt_insert_page(aux, newpage))
+      goto err;
+    if(!vm_do_claim_page(newpage))
+      goto err;
+    if(page->frame == NULL && !vm_do_claim_page(page))
+      goto err;
+    memcpy(newpage->frame->kva, page->frame->kva, PGSIZE);
+  }
+  return true;
+err:
+  return false;
+  // bool success = vm_alloc_page_with_initializer(page_get_type(page), page->va, page->writable, NULL, NULL);
+
+
+  // // * 부모 page의 정보를 활용하여 initializer 호출
+  // if (success) {
+  //   struct page *newpage = spt_find_page(&thread_current()->spt, page->va);
+
+  //   newpage->mfile = page->mfile;
+  //   newpage->file_size = page->file_size;
+  //   newpage->file_ofs = page->file_ofs;
+  //   newpage->read_bytes = page->read_bytes;
+  //   newpage->slot_idx = page->slot_idx;
+
+  //   spt_insert_page(aux, newpage);
+
+  //   // * 자식 테이블에 방금 생성된 페이지를 찾아서 frame 할당과 부모 frame memcopy
+  //   if (page->frame) {
+  //     newpage->frame = vm_get_frame();
+  //     memcpy(newpage->frame->kva, page->frame->kva, PGSIZE);
+  //     newpage->frame->page = newpage;
+  //     success = pml4_set_page(thread_current()->pml4, newpage->va, newpage->frame->kva, newpage->writable);
+  //     if (!success)
+  //       return success;
+  //   }
+  // }
+
+  // return success;
 }
 
 bool munmap_page(const struct hash_elem *a, void *aux UNUSED) {

@@ -32,9 +32,9 @@ Execution of 'exec-read' complete.
 Timer: 68 ticks
 Thread: 30 idle ticks, 33 kernel ticks, 5 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 207 reads, 506 writes
+hd0:1: 208 reads, 506 writes
 hd1:0: 229 reads, 0 writes
-hd1:1: 0 reads, 0 writes
+hd1:1: 8 reads, 0 writes
 Console: 1373 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults

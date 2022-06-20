@@ -126,7 +126,6 @@ do_munmap (void *addr) {
     addr += PGSIZE;
     pml4_clear_page(thread_current()->pml4, cur_page->va);
   }
-  pml4_clear_page(thread_current()->pml4, page->va);
 }
 
 static bool
