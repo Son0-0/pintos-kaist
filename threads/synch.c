@@ -119,8 +119,14 @@ sema_up (struct semaphore *sema) {
   }
 	sema->value++;
   // * Semaphore 해제 후 priority preemption 기능 추가
-  test_max_priority();
-
+  // test_max_priority();
+  if (preempt_by_priority()) {
+    if (intr_context()) {
+      intr_yield_on_return();
+    } else {
+      thread_yield();
+    }
+  }
 	intr_set_level (old_level);
 }
 

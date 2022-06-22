@@ -229,7 +229,7 @@ thread_create (const char *name, int priority,
   list_push_back(&thread_current()->children, &t->child_elem);
 
   // * 파일 디스크립터 초기값 설정
-  t->fdt = palloc_get_page(PAL_ZERO);
+  t->fdt = palloc_get_multiple(PAL_ZERO, 3);
 	if (t->fdt == NULL) {
 		return TID_ERROR;
 	}
@@ -240,7 +240,10 @@ thread_create (const char *name, int priority,
 	thread_unblock (t);
 
   // * 추가 코드
-  test_max_priority();
+  if (preempt_by_priority()) {
+    thread_yield();
+  }
+  // test_max_priority();
 
 	return tid;
 }
@@ -263,7 +266,11 @@ void test_max_priority (void) {
   // * 추가 코드
   if (!list_empty(&ready_list)) {
     if (cmp_priority(list_begin(&ready_list), &thread_current()->elem, NULL)) {
-      thread_yield();
+      if (intr_context()) {
+        intr_yield_on_return();
+      } else {
+        thread_yield();
+      }
     }
   }
 
@@ -395,6 +402,9 @@ void thread_awake(int64_t ticks) {
 			if (cur->wakeup_tick <= ticks) {
 			  temp = list_remove(temp);
 				thread_unblock(cur);
+        if (preempt_by_priority()) {
+          intr_yield_on_return();
+        }
 			} else {
 				if (cur->wakeup_tick < min_value) {
 					min_value = cur->wakeup_tick;
@@ -471,7 +481,10 @@ thread_set_priority (int new_priority) {
   // * 추가 코드
   refresh_priority();
   donate_priority();
-  test_max_priority();
+  // test_max_priority();
+  if (preempt_by_priority()) {
+    thread_yield();
+  }  
  }
 }
 
@@ -858,4 +871,22 @@ void mlfqs_recalc(void) {
     mlfqs_priority(list_entry(sleep, struct thread, elem));
     sleep = list_next(sleep);
   }
+}
+
+bool preempt_by_priority(void)
+{
+	int curr_priority;
+	struct thread *max_ready_thread;
+	struct list_elem *max_ready_elem;
+
+	curr_priority = thread_get_priority();
+
+	if (list_empty(&ready_list))
+		return false; /* !! if ready list is empty, return false directly !!*/
+
+	list_sort(&ready_list, &cmp_priority, NULL);
+	max_ready_elem = list_begin(&ready_list);
+	max_ready_thread = list_entry(max_ready_elem, struct thread, elem);
+
+	return curr_priority < max_ready_thread->priority;
 }

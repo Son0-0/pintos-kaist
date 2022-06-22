@@ -184,6 +184,7 @@ int thread_get_load_avg (void);
 void do_iret (struct intr_frame *tf);
 
 // * priority schedule 추가 함수
+bool preempt_by_priority(void);
 void test_max_priority (void);
 bool cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
 

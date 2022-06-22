@@ -22,6 +22,7 @@
 #ifdef VM
 #include "vm/vm.h"
 #endif
+#include "userprog/syscall.h"
 
 static void process_cleanup (void);
 static bool load (const char *file_name, struct intr_frame *if_);
@@ -245,7 +246,6 @@ process_wait (tid_t child_tid UNUSED) {
   int exit_status = child->exit_status;
   list_remove(&child->child_elem);
   sema_up(&child->exit_sema);
-  // printf("tid: %d ctid: %d exit_status: %d\n", thread_current()->tid, child->tid, exit_status);
   return exit_status;
 }
 
@@ -258,22 +258,19 @@ process_exit (void) {
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
-
-  int cnt = 2;
-  while (cnt < 128) {
-    if (table[cnt]) {
-      file_close(table[cnt]);
-      table[cnt] = NULL;
-    }
-    cnt++;
-  }
-  file_close(curr->run_file);
-  palloc_free_page(table);
-  hash_apply(&curr->spt.pages, &munmap_page);
   
+#ifdef VM  
+  hash_apply(&curr->spt.pages, &munmap_page);
+#endif
+  for (int i = 2; i < 128; i++) {
+    close(i);
+  }
+
+  palloc_free_multiple(table, 3);
+  file_close(curr->run_file);
+
   sema_up(&curr->load_sema);
   sema_down(&curr->exit_sema);
-  
   process_cleanup ();
 }
 
@@ -401,11 +398,17 @@ load (const char *file_name, struct intr_frame *if_) {
   }
 
 	/* Open executable file. */
+  lock_acquire(&filesys_lock);
   file = filesys_open (argv[0]);
+  lock_release(&filesys_lock);
 	if (file == NULL) {
 		printf ("load: %s: open failed\n", file_name);
 		goto done;
 	}
+
+  // * 추가
+  file_deny_write(file);
+  t->run_file = file;
 
 	/* Read and verify executable header. */
 	if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
@@ -485,13 +488,7 @@ load (const char *file_name, struct intr_frame *if_) {
   if_->R.rdi = cnt;
   if_->R.rsi = if_->rsp + 8;
 
-  // hex_dump(if_->rsp, if_->rsp, USER_STACK - if_->rsp, true);
-
 	success = true;
-
-  // * 추가
-  t->run_file = file;
-  file_deny_write(file);
 
 done:
 	/* We arrive here whether the load is successful or not. */
