@@ -77,7 +77,6 @@ bool vm_alloc_page_with_initializer(enum vm_type type, void *upage, bool writabl
   return success;
 err:
   return success;
-  // return false;
 }
 
 /* Find VA from spt and return page. On error, return NULL. */
@@ -190,7 +189,7 @@ bool vm_try_handle_fault(struct intr_frame *f UNUSED, void *addr UNUSED,
                          bool user UNUSED, bool write UNUSED, bool not_present UNUSED)
 {
   struct supplemental_page_table *spt UNUSED = &thread_current()->spt;
-  struct page *page = spt_find_page(spt, addr); // * ref: 혜진
+  struct page *page = spt_find_page(spt, addr);
   /* TODO: Validate the fault */
   /* TODO: Your code goes here */
   if (is_kernel_vaddr(addr))
@@ -200,7 +199,7 @@ bool vm_try_handle_fault(struct intr_frame *f UNUSED, void *addr UNUSED,
   }
 
   if (USER_STACK - (1 << 20) < addr && addr <= USER_STACK) {
-    if ((f->rsp - 8 <= addr)) { //  || (f->rsp - 12 == addr) case가 들어옴
+    if ((f->rsp - 8 <= addr)) {
       uint64_t size = thread_current()->stack_btm;
       while (addr < size) {
         size -= PGSIZE;
