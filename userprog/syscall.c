@@ -130,9 +130,9 @@ void exit(int status) {
 
 int fork (const char *thread_name) {
   check_address(thread_name);
-  // lock_acquire(&filesys_lock);
+  lock_acquire(&filesys_lock);
   int ret = process_fork(thread_name, &thread_current()->ptf);
-  // lock_release(&filesys_lock);
+  lock_release(&filesys_lock);
   return ret;
 }
 

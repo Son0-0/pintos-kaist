@@ -146,7 +146,7 @@ __do_fork (void *aux) {
 	/* 1. Read the cpu context to local stack. */
 	memcpy (&if_, parent_if, sizeof (struct intr_frame));
   if_.R.rax = 0;
-  current->tf = if_;
+  // current->tf = if_;
 
 	/* 2. Duplicate PT */
 	current->pml4 = pml4_create();
@@ -180,7 +180,7 @@ __do_fork (void *aux) {
 
   sema_up(&parent->fork_sema);
 
-  process_init ();
+  // process_init ();
 	/* Finally, switch to the newly created process. */
 	if (succ)
 		do_iret (&if_);
