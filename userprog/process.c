@@ -262,12 +262,16 @@ process_exit (void) {
 #ifdef VM  
   hash_apply(&curr->spt.pages, &munmap_page);
 #endif
+  
   for (int i = 2; i < 128; i++) {
     close(i);
   }
 
-  palloc_free_multiple(table, 3);
+  lock_acquire(&filesys_lock);
   file_close(curr->run_file);
+  lock_release(&filesys_lock);
+
+  palloc_free_multiple(table, 3);
 
   sema_up(&curr->load_sema);
   sema_down(&curr->exit_sema);

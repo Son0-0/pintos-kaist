@@ -40,7 +40,8 @@
     "tuple": "c",
     "typeinfo": "c",
     "string": "c",
-    "vm.h": "c"
+    "vm.h": "c",
+    "fat.h": "c"
   },
   "C_Cpp.errorSquiggles": "Disabled"
 }
