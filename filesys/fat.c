@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <string.h>
 
+// * 추가
+#include "kernel/bitmap.h"
+
 /* Should be less than DISK_SECTOR_SIZE */
 struct fat_boot {
 	unsigned int magic;
@@ -216,7 +219,7 @@ fat_put (cluster_t clst, cluster_t val) {
 cluster_t
 fat_get (cluster_t clst) {
 	/* TODO: Your code goes here. */
-  return fat_fs->fat[clst - 1]
+  return fat_fs->fat[clst - 1];
 }
 
 /* Covert a cluster # to a sector number. */
