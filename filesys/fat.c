@@ -55,7 +55,8 @@ fat_init (void) {
 	if (fat_fs->bs.magic != FAT_MAGIC)
 		fat_boot_create ();
 	fat_fs_init ();
-  fat_bitmap = bitmap_create(fat_fs->fat_length);
+	/도현
+	fat_bitmap = bitmap_create(fat_fs->fat_length +1);
 }
 
 void
@@ -159,10 +160,17 @@ fat_boot_create (void) {
 void
 fat_fs_init (void) {
 	/* TODO: Your code goes here. */
-  fat_fs->fat_length = fat_fs->bs.total_sectors / SECTORS_PER_CLUSTER;
-  // fat_fs->fat_length = disk_size (filesys_disk); // 우리 생각
-  // fat_fs->data_start = ROOT_DIR_CLUSTER + 1;
-  fat_fs->data_start = fat_fs->bs.fat_start + fat_fs->bs.fat_sectors; // 우리 생각
+	// fat_fs->fat_length = fat_fs->bs.total_sectors / SECTORS_PER_CLUSTER;
+	// fat_fs->fat_length = disk_size (filesys_disk); // 우리 생각
+	// fat_fs->data_start = ROOT_DIR_CLUSTER + 1;
+	// fat_fs->data_start = fat_fs->bs.fat_start + fat_fs->bs.fat_sectors; // 우리 생각
+
+  //도현
+	fat_fs->data_start = fat_fs->bs.fat_start+fat_fs->bs.fat_sectors
+	fat_fs->fat_length = fat_fs->bs.total_sectors/ SECTORS_PER_CLUSTER - (fat_fs->fat_length);
+	//root_dir 추가안해도 되는지
+
+
 }
 
 /*----------------------------------------------------------------------------*/
@@ -176,7 +184,8 @@ cluster_t
 fat_create_chain (cluster_t clst) {
 	/* TODO: Your code goes here. */
   lock_acquire(&fat_fs->write_lock);
-  cluster_t idx = bitmap_scan_and_flip(fat_bitmap, 0, 1, false);
+  //도현_비트맵 1번부터시작
+  cluster_t idx = bitmap_scan_and_flip(fat_bitmap, 1, 1, false);
   lock_release(&fat_fs->write_lock);
   
   if (idx == BITMAP_ERROR) {
@@ -197,7 +206,8 @@ fat_remove_chain (cluster_t clst, cluster_t pclst) {
 	/* TODO: Your code goes here. */
   cluster_t next_t = clst;
   while (next_t != EOChain) {
-    bitmap_set(&fat_bitmap, next_t - 1, false);
+	//도현
+    bitmap_set(&fat_bitmap, next_t, false);
     next_t = fat_get(next_t);
   }
 
@@ -209,17 +219,25 @@ fat_remove_chain (cluster_t clst, cluster_t pclst) {
 void
 fat_put (cluster_t clst, cluster_t val) {
 	/* TODO: Your code goes here. */
-  if(!bitmap_test(fat_bitmap, clst - 1))
-    bitmap_mark(fat_bitmap, clst - 1);
+//   if(!bitmap_test(fat_bitmap, clst - 1))
+//     bitmap_mark(fat_bitmap, clst - 1);
 
-  fat_fs->fat[clst - 1] = val;
+//   fat_fs->fat[clst - 1] = val;
+
+//도현 _ 비트맵 만들때 + 1로하면 계산 안복잡하게 해도됨
+  if(!bitmap_test(fat_bitmap, clst))
+    bitmap_mark(fat_bitmap, clst);
+
+  fat_fs->fat[clst] = val;
+
+
 }
 
 /* Fetch a value in the FAT table. */
 cluster_t
 fat_get (cluster_t clst) {
 	/* TODO: Your code goes here. */
-  return fat_fs->fat[clst - 1];
+  return fat_fs->fat[clst];
 }
 
 /* Covert a cluster # to a sector number. */
@@ -227,5 +245,5 @@ disk_sector_t
 cluster_to_sector (cluster_t clst) {
   ASSERT(1 <= clst);
 	/* TODO: Your code goes here. */
-  return fat_fs->data_start + (clst - 1) * SECTORS_PER_CLUSTER;
+  return fat_fs->data_start + (clst-1) * SECTORS_PER_CLUSTER;
 }
