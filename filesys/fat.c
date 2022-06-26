@@ -55,7 +55,7 @@ fat_init (void) {
 	if (fat_fs->bs.magic != FAT_MAGIC)
 		fat_boot_create ();
 	fat_fs_init ();
-	/도현
+	// /도현
 	fat_bitmap = bitmap_create(fat_fs->fat_length +1);
 }
 
@@ -122,7 +122,7 @@ fat_close (void) {
 }
 
 void
-fat_create (void) {
+fat_create (void) {	
 	// Create FAT boot
 	fat_boot_create ();
 	fat_fs_init ();
@@ -166,7 +166,7 @@ fat_fs_init (void) {
 	// fat_fs->data_start = fat_fs->bs.fat_start + fat_fs->bs.fat_sectors; // 우리 생각
 
   //도현
-	fat_fs->data_start = fat_fs->bs.fat_start+fat_fs->bs.fat_sectors
+	fat_fs->data_start = fat_fs->bs.fat_start+fat_fs->bs.fat_sectors;
 	fat_fs->fat_length = fat_fs->bs.total_sectors/ SECTORS_PER_CLUSTER - (fat_fs->fat_length);
 	//root_dir 추가안해도 되는지
 
@@ -246,4 +246,10 @@ cluster_to_sector (cluster_t clst) {
   ASSERT(1 <= clst);
 	/* TODO: Your code goes here. */
   return fat_fs->data_start + (clst-1) * SECTORS_PER_CLUSTER;
+}
+
+cluster_t
+sector_to_cluster (disk_sector_t sector){
+	ASSERT(fat_fs->data_start <= sector);
+	return (sector - fat_fs->data_start)/SECTORS_PER_CLUSTER +1;
 }

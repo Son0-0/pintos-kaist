@@ -6,6 +6,7 @@
 #include "filesys/filesys.h"
 #include "filesys/free-map.h"
 #include "threads/malloc.h"
+#include "filesys/fat.h"
 
 /* Identifies an inode. */
 #define INODE_MAGIC 0x494e4f44
@@ -16,7 +17,11 @@ struct inode_disk {
 	disk_sector_t start;                /* First data sector. */
 	off_t length;                       /* File size in bytes. */
 	unsigned magic;                     /* Magic number. */
-	uint32_t unused[125];               /* Not used. */
+	bool is_dir; 						/*도현 추가_ 디렉토리 파일인지 확인unused는 한 칸 감소*/ 
+	bool unused1;
+	bool unused2;
+	bool unused3;
+	uint32_t unused[124];               /* Not used. */
 };
 
 /* Returns the number of sectors to allocate for an inode SIZE
@@ -43,8 +48,21 @@ struct inode {
 static disk_sector_t
 byte_to_sector (const struct inode *inode, off_t pos) {
 	ASSERT (inode != NULL);
-	if (pos < inode->data.length)
-		return inode->data.start + pos / DISK_SECTOR_SIZE;
+	if (pos < inode->data.length){
+		//inoded->data.start부터 시작해서 fat_get을 이용해 pos번째 클러스터를 불러옴
+		cluster_t clst = sector_to_cluster(inode->data.start);
+		for (unsigned i = 0; i< (pos / DISK_SECTOR_SIZE); i++) {
+			clst = fat_get(clst);
+			if (clst == 0)
+				return -1;
+		}
+		//for문 다 돈 뒤 클러스터를 섹터로 변환하여 리턴
+		if (clst == 0x0FFFFFFF)
+			return -1;
+		return cluster_to_sector(clst);
+		// filesys 이전
+		// return inode->data.start + pos / DISK_SECTOR_SIZE;
+	}
 	else
 		return -1;
 }
@@ -80,14 +98,18 @@ inode_create (disk_sector_t sector, off_t length) {
 		size_t sectors = bytes_to_sectors (length);
 		disk_inode->length = length;
 		disk_inode->magic = INODE_MAGIC;
+
 		if (free_map_allocate (sectors, &disk_inode->start)) {
 			disk_write (filesys_disk, sector, disk_inode);
 			if (sectors > 0) {
 				static char zeros[DISK_SECTOR_SIZE];
 				size_t i;
-
-				for (i = 0; i < sectors; i++) 
-					disk_write (filesys_disk, disk_inode->start + i, zeros); 
+				//도현 수정 -> 기존 연속된 디스크 i를 1씩 증가시키면서 할당. 수정 후 fat_get함수를 이용해 다음 클러스트를 찾아와 할당
+				cluster_t clst = sector_to_cluster(disk_inode->start);
+				for (i = 0; i < sectors; i++){
+					disk_write (filesys_disk, cluster_to_sector(clst), zeros); 
+					clst = fat_get(clst);
+				}
 			}
 			success = true; 
 		} 
@@ -105,8 +127,7 @@ inode_open (disk_sector_t sector) {
 	struct inode *inode;
 
 	/* Check whether this inode is already open. */
-	for (e = list_begin (&open_inodes); e != list_end (&open_inodes);
-			e = list_next (e)) {
+	for (e = list_begin (&open_inodes); e != list_end (&open_inodes); e = list_next (e)) {
 		inode = list_entry (e, struct inode, elem);
 		if (inode->sector == sector) {
 			inode_reopen (inode);
@@ -239,13 +260,24 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
 
 	if (inode->deny_write_cnt)
 		return 0;
-
+	//lock 왜필요한가
+	lock_aquire(&inode->inode_lock);
 	while (size > 0) {
 		/* Sector to write, starting byte offset within sector. */
+		//섹터 idx를 계산. inode의 위치와 offset(읽기 시작할 위치)
+		//sector_ofs = 섹터 안에서 읽기 시작할 위치 
 		disk_sector_t sector_idx = byte_to_sector (inode, offset);
+		
+		//sector_idx == -1 : 할당된 클러스터가 없음 / grow_file로 할당
+		if (sector_idx == -1){
+			grow_file(inode, offset +size);
+			sector_idx = byte_to_sector(inode, offset);
+		}
 		int sector_ofs = offset % DISK_SECTOR_SIZE;
 
 		/* Bytes left in inode, bytes left in sector, lesser of the two. */
+		//inode_left = 전체 inode의 길이 - 오프셋 = 읽어야할 길이
+		//sector_left = 섹터1개 - 섹터 오프셋. 섹터 안에서 남은 길이 
 		off_t inode_left = inode_length (inode) - offset;
 		int sector_left = DISK_SECTOR_SIZE - sector_ofs;
 		int min_left = inode_left < sector_left ? inode_left : sector_left;
@@ -283,6 +315,8 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
 		bytes_written += chunk_size;
 	}
 	free (bounce);
+	//lock왜 필요한가
+	lock_realease(&inode->inode_lock);
 
 	return bytes_written;
 }
@@ -310,4 +344,40 @@ inode_allow_write (struct inode *inode) {
 off_t
 inode_length (const struct inode *inode) {
 	return inode->data.length;
+}
+
+static void grow_file(struct inode *inode, off_t pos) {
+    ASSERT(inode != NULL);
+	static char zeros[DISK_SECTOR_SIZE]; // for 제로 패딩
+	// to = 전체 필요한 sector 수
+	int to = (pos + DISK_SECTOR_SIZE-1)/DISK_SECTOR_SIZE;
+	// from = 이미 있는 sector 수
+	int from = (inode->data.length + DISK_SECTOR_SIZE -1 ) / DISK_SECTOR_SIZE;
+	//to_make는 만들어야 하는 sector수
+	int to_make = to - from;
+
+	//tmp는 시작 클러스터. inode의 inode_disk->start //파일시스 연어
+	int tmp = sector_to_cluster(inode->data.start);
+	//data->start가 0 == 디스크체인 한개도 없다
+	if (inode->data.start == 0)
+		tmp = 0;
+
+	tmp = fat_create_chain(tmp);
+	//data start가 0일경우 첫 체인 tmp로 갱신
+	if (inode->data.start == 0)
+		inode->data.start = cluster_to_sector(tmp);
+
+	//to_make만큼 for문 돌면서 체인생성
+	for (int i = 0; i < to_make-1; ++i){
+		tmp = fat_create_chain(tmp);
+		if (tmp == 0){
+			PANIC("grow file failed");
+		}
+		//zero로 패딩 왜 필요한지...?
+		// disk_write(filesys_disk, cluster_to_sector(tmp), zeros);
+	}
+	//inode->inode_disk에 length 갱신
+	inode->data.length = pos;
+	//디스크에 inode->sector에 inode_disk에 정보 업데이트
+	disk_write(filesys_disk, inode->sector, &inode->data);
 }
